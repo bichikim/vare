@@ -4,9 +4,9 @@ Vue Share State for a vue component
 
 ## What is this?
 
-This is working same as Vuex
+Vare works like Vuex.
 
-But this is less painful creating a Store then Vuex
+But this is less painful creating a Store then Vuex.
 
 ## Mutation
 
