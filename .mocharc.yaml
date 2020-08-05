@@ -1,0 +1,4 @@
+require: "test/mocha.js"
+extension: ["ts"]
+#file: "test/mocha-global.ts"
+spec: "test/**/*.spec.ts"

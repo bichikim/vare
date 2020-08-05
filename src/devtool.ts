@@ -25,7 +25,7 @@ const devtoolHook = target.__VUE_DEVTOOLS_GLOBAL_HOOK__
 //   }, { prepend: true })
 // }
 
-export function _triggerDevToolAction (storeName: string, name: string, args: any[], state: any) {
+export function _triggerDevToolAction (storeName: string, name: string, args: any[], state: any): void {
   if (process.env.NODE_ENV === 'development') {
     devtoolHook.emit(
       'vuex:action',
@@ -37,7 +37,7 @@ export function _triggerDevToolAction (storeName: string, name: string, args: an
   }
 }
 
-export function _triggerDevToolMutation (storeName: string, name: string, args: any[], state: any) {
+export function _triggerDevToolMutation (storeName: string, name: string, args: any[], state: any): void {
   if (process.env.NODE_ENV === 'development') {
     devtoolHook.emit(
       'vuex:mutation',

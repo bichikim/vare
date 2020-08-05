@@ -1,7 +1,7 @@
 module.exports = {
   root: true,
   env: {
-    node: true
+    node: true,
   },
   settings: {
     'import/parsers': {
@@ -12,7 +12,7 @@ module.exports = {
     'plugin:vue/vue3-essential',
     'plugin:@typescript-eslint/recommended',
     '@vue/standard',
-    '@vue/typescript/recommended'
+    '@vue/typescript/recommended',
   ],
   parserOptions: {
     ecmaVersion: 2020,
@@ -25,19 +25,24 @@ module.exports = {
     'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
     'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
     'comma-dangle': ['error', 'always-multiline'],
+    'object-curly-spacing': ['error', 'never'],
+    'space-before-function-paren': [
+      'error', {
+        anonymous: 'always', named: 'never', asyncArrow: 'always',
+      }],
     '@typescript-eslint/no-explicit-any': 'off',
     '@typescript-eslint/no-inferrable-types': 'off',
-    '@typescript-eslint/member-delimiter-style': 'off'
+    '@typescript-eslint/member-delimiter-style': 'off',
   },
   overrides: [
     {
       files: [
         '**/__tests__/*.{j,t}s?(x)',
-        '**/tests/unit/**/*.spec.{j,t}s?(x)'
+        '**/tests/unit/**/*.spec.{j,t}s?(x)',
       ],
       env: {
-        mocha: true
-      }
-    }
-  ]
+        mocha: true,
+      },
+    },
+  ],
 }
