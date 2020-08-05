@@ -1,6 +1,6 @@
 # Vare
 
-Vue Share State for component
+Vue Share State for a vue component
 
 ## What is this?
 
