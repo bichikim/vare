@@ -26,7 +26,7 @@ const store = createStore({
 // state like Vuex state
 const state = store.state
 
-// using state in component
+// using state in a component
 export const FooComponent = defineComponent((props) => {
   const foo = computed(() => (state.name))
   return () => {
@@ -52,7 +52,7 @@ const state = store.state
 // mutation like Vuex Mutation
 const setFoo = store.mutation((name: string) => (state.foo = name))
 
-// using state in component
+// using state in a component
 export const FooComponent = defineComponent((props) => {
   const foo = computed(() => (state.name))
   return () => {
@@ -92,7 +92,7 @@ const updateFoo = store.action(async (name) => {
   setFoo(result)
 })
 
-// using state in component
+// using state in a component
 export const FooComponent = defineComponent((props) => {
   const foo = computed(() => (state.name))
   return () => {
