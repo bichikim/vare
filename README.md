@@ -2,6 +2,11 @@
 
 Vue Share State for a vue component
 
+Prerelease version!
+
+This Vare works fine, however there may be some unknown bugs.
+(Unit tests have not been completed yet.)
+
 ## What is this?
 
 Vare works like Vuex.
@@ -21,9 +26,12 @@ const store = createStore({
 // state like Vuex state
 const state = store.state
 
-// use state in component
+// using state in component
 export const FooComponent = defineComponent((props) => {
   const foo = computed(() => (state.name))
+  return () => {
+    return h('span', foo.value)
+  }
 })
 
 
@@ -32,7 +40,7 @@ export const FooComponent = defineComponent((props) => {
 ## Mutation
 
 ```typescript
-import {createStore} from './src/index'
+import {createStore, Fragment} from './src/index'
 
 const store = createStore({
   foo: 'foo',
@@ -44,13 +52,18 @@ const state = store.state
 // mutation like Vuex Mutation
 const setFoo = store.mutation((name: string) => (state.foo = name))
 
-// 'foo'
-console.log(state.foo)
-
-setFoo('bar')
-
-// 'bar'
-console.log(state.foo)
+// using state in component
+export const FooComponent = defineComponent((props) => {
+  const foo = computed(() => (state.name))
+  return () => {
+    return h('div', 
+      h(Fragment, [
+        h('span', foo.value),
+        h('button', {onclick: () => setFoo('bar')}, 'click')
+      ])
+    )
+  }
+})
 
 ```
 
@@ -79,22 +92,49 @@ const updateFoo = store.action(async (name) => {
   setFoo(result)
 })
 
-// 'foo'
-console.log(state.foo)
-
-updateFoo('bar').then(() => { 
-  // 'bar'
-  console.log(state.foo)
+// using state in component
+export const FooComponent = defineComponent((props) => {
+  const foo = computed(() => (state.name))
+  return () => {
+    return h('div', 
+      h(Fragment, [
+        h('span', foo.value),
+        h('button', {onclick: () => updateFoo('bar')}, 'click')
+      ])
+    )
+  }
 })
+
 
 ```
 
 ## Subscribe
 
 ```typescript
+import {createStore} from './src/index'
+
+
+const store = createStore({
+  foo: 'foo',
+})
+
+const mySubscribe = (...args) => {console.log(...args)}
+const myActionSubscribe = (...args) => {console.log(...args)}
+
+// subscribe mutation
+store.subscribe(mySubmySubscribe)
+
+// unsubscribe
+store.unsubscribe(mySubmySubscribe)
+
+// subscribe action
+store.subscribeAction(myActionSubscribe)
+
+// unsubscribe action
+store.unsubscribeAction(myActionSubscribe)
 
 ```
 
 ## Supporting DevTool ?
 
-Yes
+Yes (WIP)
