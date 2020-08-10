@@ -8,6 +8,27 @@ Vare works like Vuex.
 
 However, this is less painful to create a Store than Vuex.
 
+## State
+
+```typescript
+import {createStore} from './src/index'
+import {defineComponent, computed, h} from 'vue'
+
+const store = createStore({
+  foo: 'foo',
+})
+
+// state like Vuex state
+const state = store.state
+
+// use state in component
+export const FooComponent = defineComponent((props) => {
+  const foo = computed(() => (state.name))
+})
+
+
+```
+
 ## Mutation
 
 ```typescript

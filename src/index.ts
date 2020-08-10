@@ -1,2 +1,4 @@
-export {Store, ActionFunc, SubscribeFunc, createStore} from './Store'
-export {_triggerDevToolAction, _triggerDevToolMutation} from './devtool'
+import vare from './Store'
+export default vare
+export * from './Store'
+export * from './devtool'
