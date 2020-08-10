@@ -9,6 +9,18 @@
   "unpkg": "dist/foo.umd.js",
   "module": "dist/foo.module.js",
   "source": "src/index.ts",
+  "keywords": [
+    "typescript",
+    "vuex",
+    "store",
+    "vue",
+    "vue3",
+    "vuejs",
+    "vuejs3",
+    "redux",
+    "reactive",
+    "mobx"
+  ],
   "scripts": {
     "build": "microbundle",
     "format:package.json": "sort-package-json \"package.json\" \"packages/*/package.json\" ",
