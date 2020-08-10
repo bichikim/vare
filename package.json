@@ -1,6 +1,6 @@
 {
   "name": "vare",
-  "version": "0.0.1-1",
+  "version": "0.0.1-2",
   "description": "share state for vue component ",
   "repository": "git@github.com:bichikim/vare.git",
   "license": "MIT",
