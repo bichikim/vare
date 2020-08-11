@@ -8,26 +8,24 @@ export type ActionFunc = (...args: any[]) => PromiseLike<any> | any
 export type AnyObject = Record<string | number | symbol, any>
 export type State<T> = T extends Ref ? T : UnwrapRef<T>
 
-/**
- * Protection from garbage collection
- */
-const _storeTree: Map<Store<any> | string, Store<any>> = new Map()
-
-const setStore = <T>(storeInstance: Store<T>, name?: string) => {
-  if (name) {
-    _storeTree.set(name, storeInstance)
-    return
-  }
-  _storeTree.set(storeInstance, storeInstance)
-}
-
 export class Vare {
+  _storeTree: Map<Store<any> | string, Store<any>> = new Map()
+
+  setStore<T>(storeInstance: Store<T>, name?: string): void {
+    if (name) {
+      this._storeTree.set(name, storeInstance)
+      return
+    }
+    this._storeTree.set(storeInstance, storeInstance)
+  }
+
   install(app: App): any {
-    app.config.globalProperties.$vare = _storeTree
+    app.config.globalProperties.$vare = this
   }
 }
 
-export default new Vare()
+const vare = new Vare()
+export default vare
 
 function _callAllSubscribes(subscribes: Map<SubscribeFunc, boolean>, name: string, args: any[], original: AnyFunc, wrapper: AnyFunc) {
   subscribes.forEach((_, subscribe) => {
@@ -43,7 +41,7 @@ export interface RegisterOptions {
   /**
    * @default true
    */
-  save?: boolean
+  vare?: Vare
 }
 
 export class Store<T extends AnyObject> {
@@ -54,12 +52,14 @@ export class Store<T extends AnyObject> {
   private readonly _initState: T
 
   constructor(state: T, options: RegisterOptions = {}) {
-    const {save = true, name} = options
+    const {vare: _vare, name} = options
     this._initState = {...state}
     this._state = reactive(this._initState)
     this._name = typeof name === 'undefined' ? 'unknown' : name
-    if (save) {
-      setStore(this, name)
+    if (_vare) {
+      _vare.setStore(this, name)
+    } else {
+      vare.setStore(this, name)
     }
   }
 
