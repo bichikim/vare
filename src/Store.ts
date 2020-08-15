@@ -1,37 +1,14 @@
-import {Ref, UnwrapRef, reactive} from '@vue/reactivity'
+/* eslint-disable @typescript-eslint/ban-types */
+import {reactive, Ref, UnwrapRef} from '@vue/reactivity'
 import {_triggerDevToolAction, _triggerDevToolMutation} from './devtool'
-import {App} from 'vue'
+import {StoreSubscribes, ClearType} from './StoreSubscribes'
+import {Vare} from './Vare'
 
 export type AnyFunc = (...args: any[]) => any
-export type SubscribeFunc = (name: string, args: any[], originalAction: AnyFunc, wrappedAction: AnyFunc) => any
+
 export type ActionFunc = (...args: any[]) => PromiseLike<any> | any
 export type AnyObject = Record<string | number | symbol, any>
 export type State<T> = T extends Ref ? T : UnwrapRef<T>
-
-export class Vare {
-  _storeTree: Map<Store<any> | string, Store<any>> = new Map()
-
-  setStore<T>(storeInstance: Store<T>, name?: string): void {
-    if (name) {
-      this._storeTree.set(name, storeInstance)
-      return
-    }
-    this._storeTree.set(storeInstance, storeInstance)
-  }
-
-  install(app: App): any {
-    app.config.globalProperties.$vare = this
-  }
-}
-
-const vare = new Vare()
-export default vare
-
-function _callAllSubscribes(subscribes: Map<SubscribeFunc, boolean>, name: string, args: any[], original: AnyFunc, wrapper: AnyFunc) {
-  subscribes.forEach((_, subscribe) => {
-    subscribe(name, args, original, wrapper)
-  })
-}
 
 export interface RegisterOptions {
   /**
@@ -44,47 +21,83 @@ export interface RegisterOptions {
   vare?: Vare
 }
 
-export class Store<T extends AnyObject> {
-  private _state: State<T>
-  private readonly _subscribes: Map<SubscribeFunc, boolean> = new Map()
-  private readonly _actionSubscribes: Map<SubscribeFunc, boolean> = new Map()
+export type StoreClearType = 'state' | ClearType
+
+export class Store<T extends AnyObject> extends StoreSubscribes {
   private readonly _name: string
-  private readonly _initState: T
+  private readonly _originalState: T
+
+  private _state: State<T>
+
+  get state(): State<T> {
+    return this._state
+  }
 
   constructor(state: T, options: RegisterOptions = {}) {
-    const {vare: _vare, name} = options
-    this._initState = {...state}
-    this._state = reactive(this._initState)
+    super()
+    const {vare, name} = options
+    this._originalState = {...state}
+    this._initState()
     this._name = typeof name === 'undefined' ? 'unknown' : name
-    if (_vare) {
-      _vare.setStore(this, name)
-    } else {
+    if (vare) {
       vare.setStore(this, name)
     }
   }
 
+  /**
+   * define mutation functions
+   * @param mutationTree
+   */
+  defineMutations<T extends Record<string, any>>(mutationTree: T): T {
+    return this.mutations(mutationTree)
+  }
+
+  /**
+   * define mutation functions
+   * @param mutationTree functions in an object
+   */
   mutations<T extends Record<string, AnyFunc>>(mutationTree: T): T {
     return (
-        Object.keys(mutationTree).reduce((tree: Record<string, any>, key) => {
-          const value = mutationTree[key]
-          tree[key] = this.mutation(value, key)
-          return tree
-        }, {})
+      Object.keys(mutationTree).reduce((tree: Record<string, any>, key) => {
+        const value = mutationTree[key]
+        tree[key] = this.mutation(value, key)
+        return tree
+      }, {})
     ) as any
   }
 
   /**
+   * define a mutation function
    * @param mutation
-   * @param name mutation name useful for debug
+   * @param name
    */
-  mutation<T extends AnyFunc>(mutation: T, name = 'unknown'): T {
+  defineMutation<T extends AnyFunc>(mutation: T, name?: string): T {
+    return this.mutation(mutation, name)
+  }
+
+  /**
+   * define a mutation function
+   * @param mutation
+   * @param name mutation name useful for debugging
+   */
+  mutation<T extends AnyFunc>(mutation: T, name: string = 'unknown'): T {
     const func = (...args: any[]) => {
-      _callAllSubscribes(this._subscribes, name, args, mutation, func)
+      this._triggerSubscribe('mutation', name, args, mutation, func)
       const result = mutation(...args)
       _triggerDevToolMutation(this._name, name, args, this._state)
       return result
     }
     return func as any
+  }
+
+  defineActions<T extends Record<string, any>>(actionTree: T): T {
+    return this.actions(actionTree)
+  }
+
+  getter<T>(getter: (state) => T): () => T {
+    return () => {
+      return getter(this.state)
+    }
   }
 
   actions<T extends Record<string, ActionFunc>>(actionTree: T): T {
@@ -97,9 +110,13 @@ export class Store<T extends AnyObject> {
     ) as any
   }
 
+  defineAction<T extends ActionFunc>(action: T, name?: string): T {
+    return this.action(action, name)
+  }
+
   action<T extends ActionFunc>(action: T, name: string = 'unknown'): T {
     const func = async (...args: any[]) => {
-      _callAllSubscribes(this._actionSubscribes, name, args, action, func)
+      this._triggerSubscribe('action', name, args, action, func)
       const result = await action(...args)
       _triggerDevToolAction(this._name, name, args, this._state)
       return result
@@ -108,37 +125,24 @@ export class Store<T extends AnyObject> {
     return func as any
   }
 
-  get state(): State<T> {
-    return this._state
-  }
-
-  clear(type: 'state' | 'subscribe' | 'subscribeAction'): void {
+  clear(type: StoreClearType): void {
     switch (type) {
       case 'state':
-        this._state = reactive(this._initState)
+        this._initState()
         return
-      case 'subscribe':
-        this._subscribes.clear()
-        return
-      case 'subscribeAction':
-        this._actionSubscribes.clear()
+      default:
+        super.clear(type)
     }
   }
 
-  subscribe(func: SubscribeFunc): void {
-    this._subscribes.set(func, true)
-  }
-
-  subscribeAction(func: SubscribeFunc): void {
-    this._actionSubscribes.set(func, true)
-  }
-
-  unsubscribeAction(func: SubscribeFunc): void {
-    this._actionSubscribes.delete(func)
-  }
-
-  unsubscribe(func: SubscribeFunc): void {
-    this._subscribes.delete(func)
+  protected _initState(): void {
+    this._state = reactive(this._originalState)
+    this._triggerSubscribe('init',
+      this._name,
+      [this._originalState],
+      this.constructor,
+      this.constructor,
+    )
   }
 }
 

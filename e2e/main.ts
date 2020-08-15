@@ -1,7 +1,7 @@
 import {createApp} from 'vue'
 import App from './App'
-import vare, {Vare} from '@/index'
-
+import {Vare} from 'vare'
+const vare = new Vare()
 const subVare = new Vare()
 
 createApp(App).use(vare).mount('#app')

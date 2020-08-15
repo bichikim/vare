@@ -12,7 +12,8 @@
       "esnext",
       "dom",
       "dom.iterable",
-      "scripthost"],
+      "scripthost"
+    ],
     /* Allow javascript files to be compiled. */
     "allowJs": true,
     /* Generates corresponding '.d.ts' file. */
@@ -125,6 +126,12 @@
     "noEmit": true,
     "paths": {
       "@/*": [
+        "src/*"
+      ],
+      "vare": [
+        "src/index.ts"
+      ],
+      "vare/*": [
         "src/*"
       ]
     },

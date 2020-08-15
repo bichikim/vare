@@ -37,11 +37,16 @@ module.exports = {
   overrides: [
     {
       files: [
-        '**/__tests__/*.{j,t}s?(x)',
-        '**/tests/unit/**/*.spec.{j,t}s?(x)',
+        '**/tests/**/*.spec.{j,t}s?(x)',
       ],
       env: {
         mocha: true,
+      },
+    },
+    {
+      files: ['**/tests/**/*.js'],
+      rules: {
+        '@typescript-eslint/no-var-requires': 'off',
       },
     },
   ],
