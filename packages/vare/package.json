@@ -1,0 +1,72 @@
+{
+  "name": "vare",
+  "license": "MIT",
+  "author": "bichi@live.co.kr",
+  "description": "share state for vue component ",
+  "version": "0.0.1-5",
+  "main": "dist/index.js",
+  "unpkg": "dist/foo.umd.js",
+  "module": "dist/foo.module.js",
+  "source": "src/index.ts",
+  "private": false,
+  "keywords": [
+    "typescript",
+    "vuex",
+    "store",
+    "vue",
+    "vue3",
+    "vuejs",
+    "vuejs3",
+    "redux",
+    "reactive",
+    "mobx"
+  ],
+  "scripts": {
+    "build": "microbundle",
+    "docs": "vuepress dev",
+    "docs:build": "vuepress build",
+    "test": "mocha"
+  },
+  "files": [
+    "dist/*"
+  ],
+  "dependencies": {
+    "vue": "^3.0.0-rc.5"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.11.1",
+    "@babel/preset-typescript": "^7.10.4",
+    "@babel/register": "^7.10.5",
+    "@types/chai": "^4.2.12",
+    "@types/mocha": "^8.0.1",
+    "@types/node": "^14.0.27",
+    "@types/sinon": "^9.0.4",
+    "@types/webpack": "^4.41.21",
+    "@typescript-eslint/eslint-plugin": "^3.8.0",
+    "@typescript-eslint/parser": "^3.8.0",
+    "@vue/babel-preset-app": "^4.5.0",
+    "@vue/eslint-config-standard": "^5.1.2",
+    "@vue/eslint-config-typescript": "^5.0.2",
+    "@vue/test-utils": "^2.0.0-beta.2",
+    "@zerollup/ts-transform-paths": "^1.7.18",
+    "babel-loader": "^8.1.0",
+    "babel-plugin-istanbul": "^6.0.0",
+    "babel-plugin-module-resolver": "^4.0.0",
+    "chai": "^4.2.0",
+    "eslint": "^7.6.0",
+    "eslint-plugin-import": "^2.20.2",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.0",
+    "eslint-plugin-vue": "^7.0.0-beta.1",
+    "gulp": "^4.0.2",
+    "gulp-execa": "^2.0.0",
+    "microbundle": "^0.12.3",
+    "mocha": "^8.1.1",
+    "mocha-chai-jest-snapshot": "^1.0.2",
+    "sinon": "^9.0.2",
+    "ttypescript": "^1.5.10",
+    "typescript": "^3.9.7",
+    "webpack": "^5.0.0-beta.23"
+  }
+}

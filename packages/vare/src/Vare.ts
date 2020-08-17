@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-types */
-import {Store} from '@/Store'
-import {StoreSubscribes} from '@/StoreSubscribes'
+import {Store} from './Store'
+import {StoreSubscribes} from './StoreSubscribes'
 import {App} from 'vue'
 
 type PluginsFunc = (vare: Vare) => any

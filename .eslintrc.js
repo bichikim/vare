@@ -44,7 +44,7 @@ module.exports = {
       },
     },
     {
-      files: ['**/tests/**/*.js'],
+      files: ['**/tests/**/*.js', '*.js'],
       rules: {
         '@typescript-eslint/no-var-requires': 'off',
       },

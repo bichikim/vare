@@ -125,15 +125,6 @@
     /* Do not emit output */
     "noEmit": true,
     "paths": {
-      "@/*": [
-        "src/*"
-      ],
-      "vare": [
-        "src/index.ts"
-      ],
-      "vare/*": [
-        "src/*"
-      ]
     },
     "plugins": [{"transform": "@zerollup/ts-transform-paths"}]
   },
@@ -141,8 +132,8 @@
     "src/**/*.ts",
     "src/**/*.tsx",
     "src/**/*.vue",
-    "tests/**/*.ts",
-    "tests/**/*.tsx"
+    "packages/vare/tests/**/*.ts",
+    "packages/vare/tests/**/*.tsx"
   ],
   "exclude": [
     "node_modules"
