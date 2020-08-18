@@ -27,6 +27,7 @@
   ],
   "scripts": {
     "build": "rollup -c",
+    "deploy": "yarn build && npm publish",
     "docs": "vuepress dev",
     "docs:build": "vuepress build",
     "test": "mocha"
