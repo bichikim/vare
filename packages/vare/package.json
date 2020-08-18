@@ -4,7 +4,7 @@
   "author": "bichi@live.co.kr",
   "repository": "git@github.com:bichikim/vare.git",
   "description": "share state for vue component ",
-  "version": "0.0.1-9",
+  "version": "0.0.1-10",
   "main": "dist/index.js",
   "unpkg": "dist/index.global.js",
   "module": "dist/index.module.js",
