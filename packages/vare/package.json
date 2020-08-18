@@ -3,7 +3,7 @@
   "license": "MIT",
   "author": "bichi@live.co.kr",
   "description": "share state for vue component ",
-  "version": "0.0.1-8",
+  "version": "0.0.1-9",
   "main": "dist/index.js",
   "unpkg": "dist/index.global.js",
   "module": "dist/index.module.js",
