@@ -2,6 +2,7 @@
   "name": "vare",
   "license": "MIT",
   "author": "bichi@live.co.kr",
+  "repository": "git@github.com:bichikim/vare.git",
   "description": "share state for vue component ",
   "version": "0.0.1-9",
   "main": "dist/index.js",
