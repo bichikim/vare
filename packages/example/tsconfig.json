@@ -8,6 +8,13 @@
     "tests/**/*.ts",
     "tests/**/*.tsx"
   ],
+  "compilerOptions": {
+    "paths": {
+      "@/*": [
+        "src/*"
+      ]
+    }
+  },
   "exclude": [
     "node_modules"
   ]

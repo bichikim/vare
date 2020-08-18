@@ -5,9 +5,10 @@
   "description": "share state for vue component ",
   "version": "0.0.1-5",
   "main": "dist/index.js",
-  "unpkg": "dist/foo.umd.js",
-  "module": "dist/foo.module.js",
+  "unpkg": "dist/index.global.js",
+  "module": "dist/index.module.js",
   "source": "src/index.ts",
+  "types": "dist/index.d.ts",
   "private": false,
   "keywords": [
     "typescript",
@@ -21,8 +22,11 @@
     "reactive",
     "mobx"
   ],
+  "browserslist": [
+    "last 2 version"
+  ],
   "scripts": {
-    "build": "microbundle",
+    "build": "rollup -c",
     "docs": "vuepress dev",
     "docs:build": "vuepress build",
     "test": "mocha"
@@ -61,7 +65,11 @@
     "eslint-plugin-vue": "^7.0.0-beta.1",
     "gulp": "^4.0.2",
     "gulp-execa": "^2.0.0",
-    "microbundle": "^0.12.3",
+    "@rollup/plugin-commonjs": "^15.0.0",
+    "rollup-plugin-typescript2": "^0.27.2",
+    "rollup-plugin-delete": "^2.0.0",
+    "rollup-plugin-terser": "^7.0.0",
+    "rollup": "^2.26.3",
     "mocha": "^8.1.1",
     "mocha-chai-jest-snapshot": "^1.0.2",
     "sinon": "^9.0.2",

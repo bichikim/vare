@@ -17,6 +17,7 @@
   "scripts": {
     "vare": "yarn workspace vare",
     "build": "yarn workspace vare build",
+    "deploy": "yarn workspace vare deploy",
     "example": "yarn workspace example",
     "docs": "vuepress dev",
     "docs:build": "vuepress build",
@@ -24,6 +25,9 @@
   },
   "devDependencies": {
     "sort-package-json": "^1.44.0"
+  },
+  "dependencies": {
+    "vue": "^3.0.0-rc.5"
   },
   "optionalDependencies": {
     "vuepress": "^1.5.3"

@@ -129,11 +129,10 @@
     "plugins": [{"transform": "@zerollup/ts-transform-paths"}]
   },
   "include": [
-    "src/**/*.ts",
-    "src/**/*.tsx",
-    "src/**/*.vue",
-    "packages/vare/tests/**/*.ts",
-    "packages/vare/tests/**/*.tsx"
+    "packages/vare/src/**/*.ts",
+    "packages/vare/src/**/*.tsx",
+    "packages/example/src/**/*.tsx",
+    "packages/example/src/**/*.tsx"
   ],
   "exclude": [
     "node_modules"

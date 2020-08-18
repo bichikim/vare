@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-types */
-import {reactive, Ref, UnwrapRef} from '@vue/reactivity'
+import {reactive, Ref, UnwrapRef} from 'vue'
 import {_triggerDevToolAction, _triggerDevToolMutation} from './devtool'
 import {StoreSubscribes, ClearType} from './StoreSubscribes'
 import {Vare} from './Vare'
