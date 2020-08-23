@@ -1,66 +1,51 @@
 /* eslint-disable @typescript-eslint/ban-types */
-import {Store} from './Store'
-import {StoreSubscribes} from './StoreSubscribes'
+
 import {App} from 'vue'
+import {Subscribe} from './Subscribe'
+import {StoreSubscribeNames, StoreSubscribeFunc, storeSubscribeNames, defaultSubscribeName} from './Store'
+import {StoreTree} from './StoreTree'
 
-type PluginsFunc = (vare: Vare) => any
+type PluginsFunc<S extends object> = (vare: Vare<S>) => any
 
-export interface VareOptions {
-  plugins?: PluginsFunc[]
+export interface VareOptions<S extends object> {
+  plugins?: PluginsFunc<S>[]
+  stores?: S
 }
 
-export class Vare extends StoreSubscribes {
-  _storeTree: Map<Store<any> | string, Store<any>> = new Map()
+export class Vare<S extends object> {
+  private _storeTree: StoreTree<S>
+  private readonly _subscribe: Subscribe<StoreSubscribeFunc<any>, StoreSubscribeNames>
 
-  constructor(options: VareOptions = {}) {
-    super()
-    const {plugins = []} = options
+  constructor(options: VareOptions<S> = {}) {
+    const {plugins = [], stores} = options
     this._setPlugins(plugins)
+    this._subscribe = new Subscribe(storeSubscribeNames, defaultSubscribeName)
+    this._storeTree = new StoreTree<S>(stores, this as any)
   }
 
-  setStore<T>(storeInstance: Store<T>, name?: string): void {
-    if (name) {
-      this._storeTree.set(name, storeInstance)
-    } else {
-      this._storeTree.set(storeInstance, storeInstance)
-    }
+  subscribe(func: StoreSubscribeFunc<S>, type: StoreSubscribeNames): void {
+    return this._subscribe.subscribe(func, type)
+  }
 
-    this._linkSubscribe(storeInstance)
+  unsubscribe(func: StoreSubscribeFunc<S>, type: StoreSubscribeNames): void {
+    return this._subscribe.unsubscribe(func, type)
+  }
+
+  get store(): Readonly<S> {
+    return this._storeTree.store
   }
 
   install(app: App): any {
     app.config.globalProperties.$vare = this
   }
 
-  private _mutationSubscribe(name: string, args: any[], original: Function, wrapped: Function) {
-    this._triggerSubscribe('mutation', name, args, original, wrapped)
-  }
-
-  private _initSubscribe(name: string, args: any[], original: Function, wrapped: Function) {
-    this._triggerSubscribe('init', name, args, original, wrapped)
-  }
-
-  private _actionSubscribe(name: string, args: any[], original: Function, wrapped: Function) {
-    this._triggerSubscribe('action', name, args, original, wrapped)
-  }
-
-  private _linkSubscribe<T>(storeInstance: Store<T>) {
-    storeInstance.subscribe(this._initSubscribe, 'init')
-    storeInstance.subscribe(this._mutationSubscribe, 'mutation')
-    storeInstance.subscribe(this._actionSubscribe, 'action')
-  }
-
-  private _unlinkSubscribe<T>(storeInstance: Store<T>) {
-    storeInstance.unsubscribe(this._initSubscribe, 'init')
-    storeInstance.unsubscribe(this._mutationSubscribe, 'mutation')
-    storeInstance.unsubscribe(this._actionSubscribe, 'action')
-  }
-
-  private _setPlugins(plugins: PluginsFunc[]): void {
+  private _setPlugins(plugins: PluginsFunc<S>[]): void {
     plugins.forEach((plugin) => {
       plugin(this)
     })
   }
 }
 
-export const createVare = (options?: VareOptions) => (new Vare(options))
+export const createVare = <S extends object>(options?: VareOptions<S>): Vare<S> => {
+  return new Vare(options)
+}

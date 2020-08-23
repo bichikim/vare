@@ -1,16 +1,13 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import {reactive, Ref, UnwrapRef} from 'vue'
 import {_triggerDevToolAction, _triggerDevToolMutation} from './devtool'
-import {StoreSubscribes, ClearType} from './StoreSubscribes'
+import {Subscribe} from './Subscribe'
+import {StoreTree} from './StoreTree'
 import {Vare} from './Vare'
 
-export type AnyFunc = (...args: any[]) => any
+export type State<S> = S extends Ref ? S : UnwrapRef<S>
 
-export type ActionFunc = (...args: any[]) => PromiseLike<any> | any
-export type AnyObject = Record<string | number | symbol, any>
-export type State<T> = T extends Ref ? T : UnwrapRef<T>
-
-export interface RegisterOptions {
+export interface StoreOptions<S extends object> {
   /**
    * @default 'unknown'
    */
@@ -18,30 +15,72 @@ export interface RegisterOptions {
   /**
    * @default true
    */
-  vare?: Vare
+  vare?: Vare<any>
+
+  stores?: S
+}
+export type AnyFunc = (...args: any[]) => any
+
+export type ActionFunc = (...args: any[]) => PromiseLike<any> | any
+
+export const INIT = 'init'
+export const ACTION = 'action'
+export const MUTATION = 'mutation'
+export const storeSubscribeNames: StoreSubscribeNames[] = [INIT, ACTION, MUTATION]
+export const defaultSubscribeName = MUTATION
+export type StoreSubscribeNames = 'init' | 'action' | 'mutation'
+export type StoreSubscribeFunc<S> = (type: StoreSubscribeNames, name: string, args: any[], state: State<S>) => any
+
+export const createInitState = <S extends object>(originalState: S, callback: (state) => any) => {
+  return (): State<S> => {
+    const state = reactive(originalState)
+    callback(state)
+    return state
+  }
 }
 
-export type StoreClearType = 'state' | ClearType
+interface StoreInterface {
+  name: string
+  state: string
+}
 
-export class Store<T extends AnyObject> extends StoreSubscribes {
+export class Store<S extends object, SS extends object> {
+  private _subscribe = new Subscribe<StoreSubscribeFunc<S>, StoreSubscribeNames>(storeSubscribeNames, defaultSubscribeName)
+  private _storeTree: StoreTree<SS>
   private readonly _name: string
-  private readonly _originalState: T
+  private _state: State<S>
+  private readonly _originalState: S
 
-  private _state: State<T>
+  constructor(state: S, options: StoreOptions<SS> = {}) {
+    const {vare, name, stores} = options
+    this._storeTree = new StoreTree<SS>(stores, this as any)
+    this._initState()
+    this._originalState = {...state}
+    this._name = typeof name === 'undefined' ? 'unknown' : name
+  }
 
-  get state(): State<T> {
+  subscribe(func: StoreSubscribeFunc<S>, type: StoreSubscribeNames): void {
+    return this._subscribe.subscribe(func, type)
+  }
+
+  unsubscribe(func: StoreSubscribeFunc<S>, type: StoreSubscribeNames): void {
+    return this._subscribe.unsubscribe(func, type)
+  }
+
+  get store(): Readonly<SS> {
+    return this._storeTree.store
+  }
+
+  get state(): State<S> {
     return this._state
   }
 
-  constructor(state: T, options: RegisterOptions = {}) {
-    super()
-    const {vare, name} = options
-    this._originalState = {...state}
-    this._initState()
-    this._name = typeof name === 'undefined' ? 'unknown' : name
-    if (vare) {
-      vare.setStore(this, name)
-    }
+  registerParent(store: Store<any, any>): void {
+    this._subscribe.link(store._subscribe)
+  }
+
+  unRegisterParent(store: Store<any, any>): void {
+    this._subscribe.unLink(store._subscribe)
   }
 
   /**
@@ -69,29 +108,16 @@ export class Store<T extends AnyObject> extends StoreSubscribes {
   /**
    * define a mutation function
    * @param mutation
-   * @param name
-   */
-  defineMutation<T extends AnyFunc>(mutation: T, name?: string): T {
-    return this.mutation(mutation, name)
-  }
-
-  /**
-   * define a mutation function
-   * @param mutation
    * @param name mutation name useful for debugging
    */
   mutation<T extends AnyFunc>(mutation: T, name: string = 'unknown'): T {
     const func = (...args: any[]) => {
-      this._triggerSubscribe('mutation', name, args, mutation, func)
+      this._subscribe.trigger('mutation', name, args, mutation, func)
       const result = mutation(...args)
       _triggerDevToolMutation(this._name, name, args, this._state)
       return result
     }
     return func as any
-  }
-
-  defineActions<T extends Record<string, any>>(actionTree: T): T {
-    return this.actions(actionTree)
   }
 
   getter<T>(getter: (state) => T): () => T {
@@ -110,13 +136,9 @@ export class Store<T extends AnyObject> extends StoreSubscribes {
     ) as any
   }
 
-  defineAction<T extends ActionFunc>(action: T, name?: string): T {
-    return this.action(action, name)
-  }
-
   action<T extends ActionFunc>(action: T, name: string = 'unknown'): T {
     const func = async (...args: any[]) => {
-      this._triggerSubscribe('action', name, args, action, func)
+      this._subscribe.trigger('action', name, args, action, func)
       const result = await action(...args)
       _triggerDevToolAction(this._name, name, args, this._state)
       return result
@@ -125,19 +147,19 @@ export class Store<T extends AnyObject> extends StoreSubscribes {
     return func as any
   }
 
-  clear(type: StoreClearType): void {
+  clear(type: 'state' | StoreSubscribeNames): void {
     switch (type) {
       case 'state':
         this._initState()
         return
       default:
-        super.clear(type)
+        this._subscribe.clear(type)
     }
   }
 
   protected _initState(): void {
     this._state = reactive(this._originalState)
-    this._triggerSubscribe('init',
+    this._subscribe.trigger('init',
       this._name,
       [this._originalState],
       this.constructor,
@@ -145,5 +167,3 @@ export class Store<T extends AnyObject> extends StoreSubscribes {
     )
   }
 }
-
-export const createStore = <T>(state: T, options?: RegisterOptions): Store<T> => (new Store<T>(state, options))

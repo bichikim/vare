@@ -1,6 +1,6 @@
 import {createStore} from 'vare/src'
 
-const store = createStore({
+export const store = createStore({
   name: 'foo',
   deep: {
     name: 'foo',

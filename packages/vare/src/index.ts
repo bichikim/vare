@@ -1,5 +1,5 @@
 export * from './Store'
 export * from './devtool'
 export * from './Vare'
-export * from './StoreSubscribes'
+export * from 'packages/vare/src/Subscribe'
 export * from './utils'
