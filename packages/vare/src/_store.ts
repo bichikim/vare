@@ -130,6 +130,16 @@ export const createStore = <S extends AnyObject, SS extends AnyObject>(
     ) as any
   }
 
+  const clear = (type: ClearNames): void => {
+    switch (type) {
+      case 'state':
+        initState()
+        return
+      default:
+        subscribe.clear(type)
+    }
+  }
+
   return Object.freeze({
     ...subscribe,
     get state() {
@@ -144,14 +154,6 @@ export const createStore = <S extends AnyObject, SS extends AnyObject>(
     defineAction: action,
     action,
     actions,
-    clear(type:ClearNames): void {
-      switch (type) {
-        case 'state':
-          initState()
-          return
-        default:
-          subscribe.clear(type)
-      }
-    },
+    clear,
   })
 }
