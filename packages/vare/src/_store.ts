@@ -146,6 +146,7 @@ export const createStore = <S extends AnyObject, SS extends AnyObject>(
       return reactiveState
     },
     get store() {
+      // todo it needs store tree
       return {} as SS
     },
     defineMutation: mutation,
