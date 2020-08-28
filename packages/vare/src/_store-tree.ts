@@ -7,6 +7,7 @@ export interface StoreTree {
 
 //
 export const createStoreTree = () => {
-  //
+  return Object.freeze({
+    //
+  })
 }
-

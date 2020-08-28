@@ -130,7 +130,7 @@ export const createStore = <S extends AnyObject, SS extends AnyObject>(
     ) as any
   }
 
-  return {
+  return Object.freeze({
     ...subscribe,
     get state() {
       return reactiveState
@@ -153,5 +153,5 @@ export const createStore = <S extends AnyObject, SS extends AnyObject>(
           subscribe.clear(type)
       }
     },
-  }
+  })
 }

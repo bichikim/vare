@@ -22,16 +22,16 @@ export const callAllSubscribes = <F extends AnyFunc | AnyObject>(subscribes: Map
       })
     }
 
-export const typedSubscribe = <F extends AnyFunc, P>(nest: Map<P, Map<F, true>>) =>
-  (func: F, type: P): void => {
+export const typedSubscribe = <F extends AnyFunc, P>(nest: Map<P, Map<F, true>>, defaultType: P) =>
+  (func: F, type: P = defaultType): void => {
     const subscribes = nest.get(type)
     if (subscribes) {
       subscribes.set(func, true)
     }
   }
 
-export const typedUnsubscribe = <F, P>(nest: Map<P, Map<F, true>>) =>
-  (func: F, type: P): void => {
+export const typedUnsubscribe = <F, P>(nest: Map<P, Map<F, true>>, defaultType: P) =>
+  (func: F, type: P = defaultType): void => {
     const subscribes = nest.get(type)
     if (subscribes) {
       subscribes.delete(func)
@@ -89,18 +89,18 @@ export const createSubscribe = <F extends AnyFunc, P>(types: P[], defaultType: P
 
   const trigger = typedTrigger<F, P>(nest)(afterTrigger)
 
-  const subscribe = typedSubscribe<F, P>(nest)
+  const subscribe = typedSubscribe<F, P>(nest, defaultType)
 
-  const unsubscribe = typedUnsubscribe<F, P>(nest)
+  const unsubscribe = typedUnsubscribe<F, P>(nest, defaultType)
 
   const clear = typedClear<F, P>(nest)
 
-  return {
+  return Object.freeze({
     subscribe,
     unsubscribe,
     link: (subscribe) => (link.set(subscribe, true)),
     unlink: (subscribe) => (link.delete(subscribe)),
     trigger,
     clear,
-  }
+  })
 }
