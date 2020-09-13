@@ -1,4 +1,4 @@
-import {actor} from '@/trigger/actor'
+import {actor} from '@/observer-trigger/actor'
 
 // todo WIP
 describe('actor', function test() {

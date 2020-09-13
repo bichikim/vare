@@ -1,5 +1,5 @@
 import {} from 'vare'
 
-describe('trigger', function test() {
+describe('observer-observer-trigger', function test() {
 
 })

@@ -1,9 +1,8 @@
 import {_triggerDevToolAction, _triggerDevToolMutation} from '@/devtool'
 import {createSubscribe, Subscribe} from '@/subscribe'
 import {reactive} from 'vue'
-import {createStateTrigger} from './trigger'
+import {createObserverTrigger} from './observer-trigger'
 import {AnyFunc, AnyObject, PromiseAnyFunc, State} from './types'
-import {Vare} from 'packages/vare/src/classes/Vare'
 
 export const INIT = 'init'
 export const ACTION = 'action'
@@ -24,7 +23,7 @@ export interface StoreOptions<S extends AnyObject> {
   /**
    * @default true
    */
-  vare?: Vare<any>
+  vare?: any
 
   stores?: S
 }
@@ -68,17 +67,19 @@ export const createStore = <S extends AnyObject, SS extends AnyObject>(
 
   initState()
 
-  const actMutation = createStateTrigger<StoreSubscribeNames, S>(
+  const actMutation = createObserverTrigger<StoreSubscribeNames, S>(
     namespace,
     {called: subscribe.trigger, acted: _triggerDevToolMutation},
     'mutation',
-  )(reactiveState)
+    reactiveState,
+  )
 
-  const actAction = createStateTrigger<StoreSubscribeNames, S>(
+  const actAction = createObserverTrigger<StoreSubscribeNames, S>(
     namespace,
     {called: subscribe.trigger, acted: _triggerDevToolAction},
     'action',
-  )(reactiveState)
+    reactiveState,
+  )
 
   const mutation = (mutation, name) => {
     return actMutation(mutation, name)
