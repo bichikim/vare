@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-types */
-import {Store} from './Store'
+import {Store} from 'packages/vare/src/classes/Store'
 
 export class StoreTree<S extends object> {
   private _storeTree: Map<Store<any, any>, true | string | number | symbol> = new Map()

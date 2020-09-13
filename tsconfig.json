@@ -125,6 +125,10 @@
     /* Do not emit output */
     "noEmit": true,
     "paths": {
+      "@/*": [
+        "packages/vare/src/*",
+        "packages/example/src/*"
+      ]
     },
     "plugins": [{"transform": "@zerollup/ts-transform-paths"}]
   },

@@ -119,6 +119,7 @@ export interface Subscribe<F extends AnyFunc, P> {
 
 export const createSubscribe = <F extends AnyFunc, P>(types: P[], defaultType: P): Subscribe<F, P> => {
   const nest: Map<P, Map<F, true>> = new Map()
+
   const link: Map<Subscribe<any, any>, true> = new Map()
 
   types.forEach((type) => {
@@ -126,7 +127,9 @@ export const createSubscribe = <F extends AnyFunc, P>(types: P[], defaultType: P
   })
 
   const triggerFunc = withLink<TypedTriggerProps<F, P>>(withNest(typedTrigger, nest), link)
+
   const subscribeFunc = withNest(typedSubscribe, nest)
+
   const unsubscribeFunc = withNest(typedUnsubscribe, nest)
 
   const trigger = (type: P, ...args: any[]) => triggerFunc({type, args})

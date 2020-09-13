@@ -2,8 +2,15 @@
   "extends": "../../tsconfig.json",
   "compileOnSave": false,
   "compilerOptions": {
+    "baseUrl": ".",
     "paths": {
-      "src/*": ["src/*"]
+      "@/*": ["src/*"]
     }
-  }
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "tests/**/*.tsx",
+    "tests/**/*.tsx"
+  ]
 }
