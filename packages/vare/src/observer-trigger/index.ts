@@ -1,30 +1,31 @@
 import {AnyFunc} from '@/types'
-import {actor} from './actor'
+import {observerActor} from './observer-actor'
 import {Triggers} from './types'
-
-export const createObserverTrigger = <N, S>(namespace: string = 'unknown', triggers: Triggers<N, S, any>, type: N, state: S) =>
-  <T extends AnyFunc>(action: T, name: string = 'unknown'): T =>
-    observerTrigger({
-      triggers, state, action, namespace, name, type,
-    })
 
 interface TriggerOptions<N, S, T> {
   triggers: Triggers<N, S, any>
-  state: S
+  state?: S
   action: T,
-  namespace: string
-  name: string
+  namespace?: string
+  name?: string
   type: N
 }
 
+type CreateTriggerOptions<N, S> = Omit<TriggerOptions<N, S, any>, 'action' | 'name'>
+
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+export const createObserverTrigger = <N, S>(options: CreateTriggerOptions<N, S>) => {
+  const {type, state, triggers, namespace} = options
+  return <T extends AnyFunc>(action: T, name: string = 'unknown'): T =>
+    observerTrigger({
+      triggers, state, action, namespace, name, type,
+    })
+}
+
 export const observerTrigger = <N, S, T extends AnyFunc>(options: TriggerOptions<N, S, T>): T => {
-  const {namespace = 'unknown', name = 'unknown', action, state, triggers, type} = options
-  const wrapper: any = (...args: any[]) => actor<N, S, T>({
+  const {namespace = 'unknown', name = 'unknown', action, state = {} as S, triggers, type} = options
+  const wrapper: any = (...args: any[]) => observerActor<N, S, T>({
     action, state, wrapper, type, namespace, name, args, triggers,
   })
   return wrapper
-}
-
-export const isPromise = (value: any): value is Promise<any> => {
-  return typeof value === 'object' && typeof value.then === 'function' && typeof value.catch === 'function'
 }

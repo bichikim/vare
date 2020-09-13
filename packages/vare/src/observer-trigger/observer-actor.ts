@@ -1,8 +1,8 @@
-import {isPromise} from '@/utils'
 import {AnyFunc} from '@/types'
+import {isPromise} from '@/utils'
 import {Triggers} from './types'
 
-interface ActorOptions<N, S, T extends AnyFunc> {
+interface ObserverActorOptions<N, S, T extends AnyFunc> {
   action: T
   wrapper?: T
   state?: S
@@ -13,7 +13,7 @@ interface ActorOptions<N, S, T extends AnyFunc> {
   args: any[]
 }
 
-export const actor = <N, S, T extends AnyFunc>(options: ActorOptions<N, S, T>): ReturnType<T> => {
+export const observerActor = <N, S, T extends AnyFunc>(options: ObserverActorOptions<N, S, T>): ReturnType<T> => {
   const {triggers = {}, args, action, name = 'unknown', namespace = 'unknown', state = {} as S, type, wrapper = action} = options
   const {acted, called} = triggers
   const triggerActed = () => {

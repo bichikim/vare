@@ -3,6 +3,7 @@ import {createSubscribe, Subscribe} from '@/subscribe'
 import {reactive} from 'vue'
 import {createObserverTrigger} from './observer-trigger'
 import {AnyFunc, AnyObject, PromiseAnyFunc, State} from './types'
+import {wraps} from '@/utils'
 
 export const INIT = 'init'
 export const ACTION = 'action'
@@ -67,47 +68,27 @@ export const createStore = <S extends AnyObject, SS extends AnyObject>(
 
   initState()
 
-  const actMutation = createObserverTrigger<StoreSubscribeNames, S>(
+  const actMutation = createObserverTrigger<StoreSubscribeNames, S>({
     namespace,
-    {called: subscribe.trigger, acted: _triggerDevToolMutation},
-    'mutation',
-    reactiveState,
-  )
+    triggers: {called: subscribe.trigger, acted: _triggerDevToolMutation},
+    type: 'mutation',
+    state: reactiveState,
+  })
 
-  const actAction = createObserverTrigger<StoreSubscribeNames, S>(
+  const actAction = createObserverTrigger<StoreSubscribeNames, S>({
     namespace,
-    {called: subscribe.trigger, acted: _triggerDevToolAction},
-    'action',
-    reactiveState,
-  )
+    triggers: {called: subscribe.trigger, acted: _triggerDevToolAction},
+    type: 'action',
+    state: reactiveState,
+  })
 
-  const mutation = (mutation, name) => {
-    return actMutation(mutation, name)
-  }
+  const mutation = (mutation, name) => actMutation(mutation, name)
 
-  const mutations = <T extends Record<string, AnyFunc>>(mutationTree: T): T => {
-    return (
-      Object.keys(mutationTree).reduce((tree: Record<string, any>, key) => {
-        const value = mutationTree[key]
-        tree[key] = mutation(value, key)
-        return tree
-      }, {})
-    ) as any
-  }
+  const mutations = <T extends Record<string, AnyFunc>>(mutationTree: T): T => wraps(mutationTree, mutation)
 
-  const action = <T extends AnyFunc>(action: T, name?: string) => {
-    return actAction(action, name)
-  }
+  const action = <T extends AnyFunc>(action: T, name?: string) => actAction(action, name)
 
-  const actions = <T extends Record<string, ActionFunc>>(actionTree: T): T => {
-    return (
-      Object.keys(actionTree).reduce((tree: Record<string, any>, key) => {
-        const value = actionTree[key]
-        tree[key] = action(value, key)
-        return tree
-      }, {})
-    ) as any
-  }
+  const actions = <T extends Record<string, ActionFunc>>(actionTree: T): T => wraps(actionTree, action)
 
   const clear = (type: ClearNames): void => {
     switch (type) {
