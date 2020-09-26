@@ -16,21 +16,14 @@ export type ActionFunc = (...args: any[]) => PromiseLike<any> | any
 
 export type StoreSubscribeFunc<S> = (type: StoreSubscribeNames, name: string, args: any[], state: State<S>) => any
 
-export interface StoreOptions<S extends AnyObject> {
+export interface StoreOptions {
   /**
    * @default 'unknown'
    */
   name?: string
-  /**
-   * @default true
-   */
-  vare?: any
-
-  stores?: S
 }
 
-export interface Store<S extends AnyObject, SS extends AnyObject> extends Subscribe<any, any> {
-  readonly store: Readonly<SS>
+export interface Store<S extends AnyObject> extends Subscribe<any, any> {
   readonly state: State<S>
 
   mutations<T extends Record<string, AnyFunc>>(mutationTree: T): T
@@ -48,10 +41,10 @@ export interface Store<S extends AnyObject, SS extends AnyObject> extends Subscr
   clear(type: ClearNames): void
 }
 
-export const createStore = <S extends AnyObject, SS extends AnyObject>(
+export const createStore = <S extends AnyObject>(
   state: S,
-  options: StoreOptions<SS> = {},
-): Store<S, SS> => {
+  options: StoreOptions = {},
+): Store<S> => {
   const {name: namespace = 'unknown'} = options
   const originalState = {...state}
   const subscribe = createSubscribe<StoreSubscribeFunc<S>, StoreSubscribeNames>(
@@ -59,11 +52,11 @@ export const createStore = <S extends AnyObject, SS extends AnyObject>(
     defaultSubscribeName,
   )
 
-  let reactiveState
+  let reactiveState = reactive(originalState)
 
   const initState = () => {
     reactiveState = reactive(originalState)
-    subscribe.trigger('init', name, [originalState], initState, initState)
+    subscribe.trigger('init', namespace, [originalState], initState, initState)
   }
 
   initState()
@@ -104,10 +97,6 @@ export const createStore = <S extends AnyObject, SS extends AnyObject>(
     ...subscribe,
     get state() {
       return reactiveState
-    },
-    get store() {
-      // todo it needs store tree
-      return {} as SS
     },
     defineMutation: mutation,
     mutation,

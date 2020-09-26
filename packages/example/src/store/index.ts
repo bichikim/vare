@@ -1,4 +1,4 @@
-import {createStore} from 'vare/src'
+import {createStore} from 'vare'
 
 export const store = createStore({
   name: 'foo',
@@ -11,8 +11,6 @@ export const state = store.state
 
 export const setName = store.mutation((name: string) => {
   state.name = name
-
-  console.log(state.name)
 })
 
 export const setDeepName = store.mutation((name: string) => {

@@ -68,7 +68,7 @@ const defaultExecute = <F extends AnyFunc | AnyObject>(target: F, ...args: any[]
   }
 }
 
-export const callAllSubscribes = <F extends AnyFunc | AnyObject>(props: WithSubscribes<F>) => {
+export const callAllSubscribes = <F extends AnyFunc | AnyObject>(props: WithSubscribes<F>): void => {
   const {subscribes = [], execute = defaultExecute, args = []} = props
   subscribes.forEach((_, subscribe) => {
     execute(subscribe, ...args)
