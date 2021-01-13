@@ -101,7 +101,7 @@ const store = createStore({
 const state = store.state
 
 // mutation like Vuex Mutation
-const setFoo = store.mutation((name: string) => (state.foo = name))
+const setFoo = store.mutation((state, name: string) => (state.foo = name))
 
 // mock api request
 const request = (name: string) => (Promise.resolve(name))
