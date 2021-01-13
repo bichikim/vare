@@ -8,8 +8,12 @@ export interface Triggers<T extends AnyFunc, C = any, A = any> {
   called?: (...args: A[]) => any
 }
 
-export const actor = <T extends AnyFunc>(action: T, triggers: Triggers<T> = {}): (...args: Parameters<T>) => ReturnType<T> => {
+export const actor = <T extends AnyFunc>(action: T, firstArgs: any[] = [], triggers: Triggers<T> = {}): (...args: Parameters<T>) => ReturnType<T> => {
   const {called, acted, actedArgs, calledArgs} = triggers
+
+  const myAction: T = ((...args) => {
+    return action(...firstArgs, ...args)
+  }) as any
 
   const after: After<T> = (action, result, ...args) => {
     if (acted) {
@@ -25,7 +29,7 @@ export const actor = <T extends AnyFunc>(action: T, triggers: Triggers<T> = {}):
     }
   }
 
-  return withAnnounce(action, {
+  return withAnnounce(myAction, {
     after,
     before,
   })

@@ -26,9 +26,9 @@ export interface StoreOptions {
 export interface Store<S extends AnyObject> extends Subscribe<any, any> {
   readonly state: State<S>
 
-  mutations<T extends Record<string, AnyFunc>>(mutationTree: T): T
+  // mutations<T extends Record<string, AnyFunc>>(mutationTree: T): T
 
-  mutation<T extends AnyFunc>(mutation: T, name?: string): T
+  mutation<A extends any[], R>(mutation: (state: S, ...args: A) => R, name?: string): (...args: A) => R
 
   defineMutation<T extends AnyFunc>(mutation: T, name?: string): T
 
@@ -68,6 +68,7 @@ export const createStore = <S extends AnyObject>(
     triggers: {called: subscribe.trigger, acted: _triggerDevToolMutation},
     type: 'mutation',
     state: reactiveState,
+    firstArgs: [reactiveState]
   })
 
   const actAction = createObserverTrigger<StoreSubscribeNames, S>({
@@ -79,7 +80,7 @@ export const createStore = <S extends AnyObject>(
 
   const mutation = (mutation, name) => actMutation(mutation, name)
 
-  const mutations = <T extends Record<string, AnyFunc>>(mutationTree: T): T => wraps(mutationTree, mutation)
+  // const mutations = <T extends Record<string, AnyFunc>>(mutationTree: T): T => wraps(mutationTree, mutation)
 
   const action = <T extends AnyFunc>(action: T, name?: string) => actAction(action, name)
 
@@ -102,7 +103,7 @@ export const createStore = <S extends AnyObject>(
     },
     defineMutation: mutation,
     mutation,
-    mutations,
+    // mutations,
     defineAction: action,
     action,
     actions,

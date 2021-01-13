@@ -51,7 +51,7 @@ export function withThen<T extends AnyFunc>(action: T, then?: Then<T, any>): T {
 export function withAfter<T extends AnyFunc>(action: T, after?: After<T>): T {
   return ((...args: Parameters<T>): ReturnType<T> => {
     const result = action(...args)
-    after?.(action, result, ...args)
+    after && after(action, result, ...args)
     return result
   }) as T
 }
