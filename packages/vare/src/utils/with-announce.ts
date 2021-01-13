@@ -26,7 +26,7 @@ export function withTrap<T extends AnyFunc, A extends (args: Parameters<T>) => R
 
 export function withBefore<T extends AnyFunc>(action: T, before?: Before<T>): T {
   return ((...args: Parameters<T>): ReturnType<T> => {
-    before && before(action, ...args)
+    before?.(action, ...args)
     return action(...args)
   }) as T
 }
@@ -43,7 +43,7 @@ export function withThen<T extends AnyFunc>(action: T, then?: Then<T, any>): T {
       },
       ) as ReturnType<T>
     }
-    then && then(action, result, ...args)
+    then?.(action, result, ...args)
     return result
   }) as T
 }
@@ -51,7 +51,7 @@ export function withThen<T extends AnyFunc>(action: T, then?: Then<T, any>): T {
 export function withAfter<T extends AnyFunc>(action: T, after?: After<T>): T {
   return ((...args: Parameters<T>): ReturnType<T> => {
     const result = action(...args)
-    after && after(action, result, ...args)
+    after?.(action, result, ...args)
     return result
   }) as T
 }

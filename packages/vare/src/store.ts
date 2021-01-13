@@ -1,4 +1,4 @@
-import {_triggerDevToolAction, _triggerDevToolMutation} from '@/devtool'
+import {_triggerDevToolAction, _triggerDevToolMutation, _triggerDevToolInit} from '@/devtool'
 import {createSubscribe, Subscribe} from '@/subscribe'
 import {reactive} from 'vue'
 import {createObserverTrigger} from './observer-trigger'
@@ -60,6 +60,8 @@ export const createStore = <S extends AnyObject>(
   }
 
   initState()
+
+  _triggerDevToolInit(reactiveState)
 
   const actMutation = createObserverTrigger<StoreSubscribeNames, S>({
     namespace,

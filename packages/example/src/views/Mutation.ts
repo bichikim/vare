@@ -8,11 +8,11 @@ export default defineComponent({
       setName(name.value + '1')
     }
 
-    return () => (
-      h('div', [
+    return () => {
+      return h('div', [
         h('span', name.value),
         h('button', {onclick: handleClick}, 'add'),
       ])
-    )
+    }
   },
 })

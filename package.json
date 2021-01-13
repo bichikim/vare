@@ -1,33 +1,34 @@
 {
   "name": "vare",
+  "private": true,
   "description": "vare packages",
   "keywords": [
     "vare"
   ],
+  "repository": "git@github.com:bichikim/vare.git",
+  "license": "MIT",
+  "author": "bichi@live.co.kr",
   "workspaces": {
     "packages": [
       "packages/*"
     ]
   },
-  "private": true,
-  "repository": "git@github.com:bichikim/vare.git",
-  "license": "MIT",
-  "author": "bichi@live.co.kr",
   "scripts": {
-    "vare": "yarn workspace vare",
     "build": "yarn workspace vare build",
     "deploy": "yarn workspace vare deploy",
-    "example": "yarn workspace example",
+    "dev:example": "lerna run dev --scope example --include-dependencies --parallel",
     "docs": "vuepress dev",
     "docs:build": "vuepress build",
-    "format:package.json": "sort-package-json \"package.json\" \"packages/*/package.json\" "
+    "example": "yarn workspace example",
+    "format:package.json": "sort-package-json \"package.json\" \"packages/*/package.json\" ",
+    "vare": "yarn workspace vare"
+  },
+  "dependencies": {
+    "vue": "^3.0.5"
   },
   "devDependencies": {
     "lerna": "^3.22.1",
     "sort-package-json": "^1.44.0"
-  },
-  "dependencies": {
-    "vue": "^3.0.0-rc.5"
   },
   "optionalDependencies": {
     "vuepress": "^1.5.3"

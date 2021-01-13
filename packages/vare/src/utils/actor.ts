@@ -11,8 +11,6 @@ export interface Triggers<T extends AnyFunc, C = any, A = any> {
 export const actor = <T extends AnyFunc>(action: T, triggers: Triggers<T> = {}): (...args: Parameters<T>) => ReturnType<T> => {
   const {called, acted, actedArgs, calledArgs} = triggers
 
-  console.log('actor', called)
-
   const after: After<T> = (action, result, ...args) => {
     if (acted) {
       const _args = actedArgs ? actedArgs(action, args) : [action, args]

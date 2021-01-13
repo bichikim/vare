@@ -24,6 +24,7 @@ module.exports = {
   rules: {
     'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
     'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
+    'no-unused-expressions': 'off',
     'comma-dangle': ['error', 'always-multiline'],
     'object-curly-spacing': ['error', 'never'],
     'space-before-function-paren': [
@@ -33,6 +34,10 @@ module.exports = {
     "@typescript-eslint/explicit-module-boundary-types": 'off',
     '@typescript-eslint/no-explicit-any': 'off',
     '@typescript-eslint/no-inferrable-types': 'off',
+    '@typescript-eslint/no-unused-expressions': ['error', {
+        allowTernary: true,
+        allowShortCircuit: true,
+    }],
     '@typescript-eslint/member-delimiter-style': 'off',
   },
   overrides: [
