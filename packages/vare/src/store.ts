@@ -2,7 +2,7 @@ import {_triggerDevToolAction, _triggerDevToolMutation, _triggerDevToolInit} fro
 import {createSubscribe, Subscribe} from '@/subscribe'
 import {reactive} from 'vue'
 import {createObserverTrigger} from './observer-trigger'
-import {AnyFunc, AnyObject, PromiseAnyFunc, State, DropParameters} from './types'
+import {AnyFunc, AnyObject, PromiseAnyFunc, State, DropParameters, OneAndAnyFunc} from './types'
 import {wraps} from '@/utils'
 
 export const INIT = 'init'
@@ -26,7 +26,7 @@ export interface StoreOptions {
 export interface Store<S extends AnyObject> extends Subscribe<any, any> {
   readonly state: State<S>
 
-  mutations<K extends string, F extends AnyFunc>(mutationTree: Record<K, F>): Record<K, (...args: DropParameters<F>) => any>
+  mutations<K extends string, F extends OneAndAnyFunc<S>>(mutationTree: Record<K, F>): Record<K, (...args: DropParameters<F, S>) => ReturnType<F>>
 
   mutation<A extends any[], R>(mutation: (state: S, ...args: A) => R, name?: string): (...args: A) => R
 
@@ -80,7 +80,9 @@ export const createStore = <S extends AnyObject>(
 
   const mutation = (mutation, name) => actMutation(mutation, name)
 
-  const mutations = <T extends Record<string, AnyFunc>>(mutationTree: T): T => wraps(mutationTree, mutation)
+  const mutations = <K extends string, F extends OneAndAnyFunc<S>>(
+    mutationTree: Record<K, F>,
+  ): Record<K, (...args: DropParameters<F, S>) => ReturnType<F>> => wraps(mutationTree, mutation)
 
   const action = <T extends AnyFunc>(action: T, name?: string) => actAction(action, name)
 
