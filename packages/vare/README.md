@@ -167,7 +167,7 @@ const store = createStore({
 // state like Vuex state
 const state = store.state
 
-// mutations (WIP)
+// mutations
 const {setFoo, setBar} = store.mutations({
   setFoo(state, name) {
     state.foo = name
