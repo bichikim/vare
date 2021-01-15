@@ -28,7 +28,22 @@
   },
   "devDependencies": {
     "lerna": "^3.22.1",
-    "sort-package-json": "^1.44.0"
+    "sort-package-json": "^1.44.0",
+    "@vue/cli-service": "^4.5.10",
+    "@vue/cli-plugin-typescript": "^4.5.10",
+    "karma-webpack": "^5.0.0-alpha.5",
+    "istanbul-instrumenter-loader": "^3.0.1",
+    "@welldone-software/webpack-monorepo-resolver": "^0.4.0",
+    "karma-spec-reporter": "0.0.32",
+    "mocha": "^8.2.1",
+    "chai": "^4.2.0",
+    "karma-chai": "^0.1.0",
+    "karma-coverage": "^2.0.3",
+    "karma-mocha-reporter": "^2.2.5",
+    "karma": "^6.0.0",
+    "karma-mocha": "^2.0.1",
+    "karma-chrome-launcher": "^3.1.0",
+    "webpack": "^5.14.0"
   },
   "optionalDependencies": {
     "vuepress": "^1.5.3"

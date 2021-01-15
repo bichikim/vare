@@ -1,4 +1,4 @@
-import {createStore} from 'vare'
+import {createStore} from '@/index'
 
 describe('store actions', function test() {
   it('should act getFoo & getBar ', async function test() {
