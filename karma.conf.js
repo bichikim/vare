@@ -16,8 +16,9 @@ webpackChain.resolve.alias.set('@', 'src')
 webpackChain.optimization.clear()
 webpackChain.optimization.runtimeChunk(false)
 webpackChain.optimization.splitChunks(false)
+webpackChain.devtool('inline-source-map')
 webpackChain.resolve.plugin('monorepo').use(WebpackMonorepoResolver, [{possiblePackageEntries: ['', 'src']}])
-webpackChain.module.rule('istanbul').test(/\.ts$/).exclude.add(/spec.ts$/).add(/__tests__/).end().post().use('istanbul').loader('istanbul-instrumenter-loader').options({esModules: true})
+webpackChain.module.rule('istanbul').test(/\.(ts|vue)$/).exclude.add(/spec.ts$/).add(/__tests__/).end().post().use('istanbul').loader('istanbul-instrumenter-loader').options({esModules: true})
 
 const webpackConfig = webpackChain.toConfig()
 
@@ -31,6 +32,8 @@ module.exports = (config) => {
 
     files: [
       {pattern: 'packages/*/__tests__/**/*.spec.ts', watched: false},
+      // for coverage
+      // {pattern: 'packages/*/src/**/*.ts', watched: false},
     ],
 
     mime: {
@@ -39,6 +42,8 @@ module.exports = (config) => {
 
     preprocessors: {
       'packages/*/__tests__/**/*.spec.ts': ['webpack'],
+      // for coverage
+      // 'packages/*/src/**/*.ts': ['webpack'],
     },
     webpack: webpackConfig,
     webpackMiddleware: {
