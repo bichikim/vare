@@ -38,9 +38,12 @@ export function _triggerDevToolInit(state): void {
     setTimeout(() => {
       devtoolHook.emit(
         'vuex:init',
-        {state, replaceState: function (state) {
-          console.log(state)
-          }},
+        {
+          state,
+          replaceState: function (state) {
+            console.log(state)
+          },
+        },
       )
     })
   }
