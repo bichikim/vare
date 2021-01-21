@@ -2,9 +2,6 @@
   "name": "example-vue-2",
   "private": true,
   "version": "0.0.1",
-  "workspaces": {
-    "nohoist": ["vare"]
-  },
   "scripts": {
     "dev": "parcel serve index.html --port 8080",
     "build": "parcel index.html"

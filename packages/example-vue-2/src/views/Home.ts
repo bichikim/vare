@@ -1,9 +1,9 @@
-import {defineComponent} from '@vue/composition-api'
+import {defineComponent, h} from '@vue/composition-api'
 
 export default defineComponent({
-  template: `
-    <div>
-      vare example
-    </div>
-  `,
+  setup() {
+    return () => {
+      return h('div', 'vare example')
+    }
+  },
 })

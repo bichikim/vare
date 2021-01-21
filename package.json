@@ -30,9 +30,6 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "@vue/cli-plugin-typescript": "^4.5.10",
-    "@vue/cli-service": "^4.5.10",
-    "@vue/compiler-sfc": "^3.0.5",
     "@welldone-software/webpack-monorepo-resolver": "^0.4.0",
     "babel-loader": "^8.2.2",
     "chai": "^4.2.0",
