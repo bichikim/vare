@@ -28,6 +28,7 @@
   ],
   "scripts": {
     "build": "rollup -c",
+    "prepublish": "yarn build",
     "deploy": "yarn build && npm publish",
     "dev": "rollup -c --watch",
     "docs": "vuepress dev",
