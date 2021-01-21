@@ -13,7 +13,7 @@ Vare works like Vuex.
 
 However, this is less painful to create a Store than Vuex.
 
-## Use Vare with Vue (Vue 3.0)
+## Use Vare with Vue (Vue 3.0 or Vue 2 with @vue/composition-api) 
 
 ```typescript
 
