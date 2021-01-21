@@ -1,5 +1,5 @@
 {
-  "name": "vare",
+  "name": "vare-project",
   "private": true,
   "description": "vare packages",
   "keywords": [
@@ -21,7 +21,8 @@
     "docs:build": "vuepress build",
     "example": "yarn workspace example",
     "format:package.json": "sort-package-json \"package.json\" \"packages/*/package.json\" ",
-    "vare": "yarn workspace vare"
+    "vare": "yarn workspace vare",
+    "test": "karma start karma.conf.js"
   },
   "dependencies": {
     "vue": "^3.0.5"
