@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-types */
-import {Ref, UnwrapRef} from 'vue'
+import {Ref, UnwrapRef} from 'vue-demi'
 
 export type Constructor<T = {}> = new (...args: any[]) => T
 export type AnyFunc = (...args: any[]) => any

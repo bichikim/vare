@@ -1,6 +1,6 @@
 import {_triggerDevToolAction, _triggerDevToolMutation, _triggerDevToolInit} from '@/devtool'
 import {createSubscribe, Subscribe} from '@/subscribe'
-import {reactive} from 'vue'
+import {reactive} from 'vue-demi'
 import {createObserverTrigger} from './observer-trigger'
 import {AnyFunc, AnyObject, PromiseAnyFunc, State, DropParameters, OneAndAnyFunc} from './types'
 import {wraps} from '@/utils'

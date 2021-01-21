@@ -1,9 +1,6 @@
 .DS_Store
 node_modules
-
-# dest
 /dist
-/.vuepress/dist
 
 # local env files
 .env.local
@@ -24,3 +21,4 @@ pnpm-debug.log*
 *.sln
 *.sw?
 
+.cache

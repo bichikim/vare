@@ -11,6 +11,10 @@
   "workspaces": {
     "packages": [
       "packages/*"
+    ],
+    "nohoist": [
+      "**/vue",
+      "**/vue-router"
     ]
   },
   "scripts": {
@@ -24,13 +28,13 @@
     "vare": "yarn workspace vare",
     "test": "karma start karma.conf.js"
   },
-  "dependencies": {
-    "vue": "^3.0.5"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@vue/cli-plugin-typescript": "^4.5.10",
     "@vue/cli-service": "^4.5.10",
+    "@vue/compiler-sfc": "^3.0.5",
     "@welldone-software/webpack-monorepo-resolver": "^0.4.0",
+    "babel-loader": "^8.2.2",
     "chai": "^4.2.0",
     "istanbul-instrumenter-loader": "^3.0.1",
     "karma": "^6.0.0",

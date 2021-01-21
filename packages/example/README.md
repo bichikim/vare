@@ -1,1 +1,1 @@
-# Example
+# Example in Vue 3
