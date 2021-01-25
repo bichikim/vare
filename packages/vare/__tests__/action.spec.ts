@@ -1,7 +1,7 @@
-import {createStore} from '@/index'
+import {createStore} from '../src/index'
 
 describe('store action', function test() {
-  it('should act getfoo', async function test() {
+  it('should act getFoo', async function test() {
     const store = createStore({
       foo: 'foo',
     })

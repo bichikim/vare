@@ -1,4 +1,4 @@
-import {createStore} from '@/index'
+import {createStore} from '../src/index'
 
 describe('store actions', function test() {
   it('should act getFoo & getBar ', async function test() {

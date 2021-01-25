@@ -1,4 +1,4 @@
-import {createStore} from '@/index'
+import {createStore} from '../src/index'
 
 describe('store mutations', function test() {
   it('should mutate foo state', function test() {

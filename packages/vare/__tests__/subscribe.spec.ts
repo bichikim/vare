@@ -1,4 +1,4 @@
-import {createStore} from 'vare'
+import {createStore} from '../src/store'
 import {spy} from 'sinon'
 
 describe('store subscribe', function test() {

@@ -11,14 +11,17 @@ webpackChain.node.clear()
 webpackChain.plugins.delete('html')
 webpackChain.plugins.delete('prefetch')
 webpackChain.plugins.delete('preload')
+webpackChain.plugins.delete('define')
+webpackChain.plugins.delete('terser')
 webpackChain.resolve.alias.delete('@')
 webpackChain.resolve.alias.set('@', 'src')
 webpackChain.optimization.clear()
 webpackChain.optimization.runtimeChunk(false)
 webpackChain.optimization.splitChunks(false)
+webpackChain.optimization.minimizers.delete('terser')
 webpackChain.devtool('inline-source-map')
 webpackChain.resolve.plugin('monorepo').use(WebpackMonorepoResolver, [{possiblePackageEntries: ['', 'src']}])
-webpackChain.module.rule('istanbul').test(/\.(ts|vue)$/).exclude.add(/spec.ts$/).add(/__tests__/).end().post().use('istanbul').loader('istanbul-instrumenter-loader').options({esModules: true})
+// webpackChain.module.rule('istanbul').test(/\.(ts|vue)$/).exclude.add(/spec.ts$/).add(/__tests__/).end().post().use('istanbul').loader('istanbul-instrumenter-loader').options({esModules: true})
 
 const webpackConfig = webpackChain.toConfig()
 
@@ -28,10 +31,10 @@ module.exports = (config) => {
     singleRun: true,
     reporters: ['mocha', 'coverage-istanbul'],
     frameworks: ['mocha', 'chai'],
-    browsers: ['ChromeHeadless'],
+    browsers: ['ChromeHeadlessNoneSecurity'],
 
     files: [
-      {pattern: 'packages/*/__tests__/**/*.spec.ts', watched: false},
+      'test.ts',
       // for coverage
       // {pattern: 'packages/*/src/**/*.ts', watched: false},
     ],
@@ -41,9 +44,7 @@ module.exports = (config) => {
     },
 
     preprocessors: {
-      'packages/*/__tests__/**/*.spec.ts': ['webpack'],
-      // for coverage
-      // 'packages/*/src/**/*.ts': ['webpack'],
+      'test.ts': ['webpack'],
     },
     webpack: webpackConfig,
     webpackMiddleware: {
@@ -52,6 +53,13 @@ module.exports = (config) => {
     coverageIstanbulReporter: {
       reports: ['html', 'text-summary', 'lcovonly'],
       fixWebpackSourcePaths: true,
+    },
+
+    customLaunchers: {
+      ChromeHeadlessNoneSecurity: {
+        base: 'ChromeHeadless',
+        flags: ['--disable-web-security', '--disable-site-isolation-trials'],
+      },
     },
   })
 }
