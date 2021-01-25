@@ -22,19 +22,21 @@
     "deploy": "yarn workspace vare deploy",
     "dev:example": "lerna run dev --scope example --include-dependencies --parallel",
     "docs": "vuepress dev",
+    "clean": "rimraf node_modules && lerna clean",
     "docs:build": "vuepress build",
     "example": "yarn workspace example",
     "format:package.json": "sort-package-json \"package.json\" \"packages/*/package.json\" ",
     "vare": "yarn workspace vare",
     "test": "karma start karma.conf.js"
   },
-  "dependencies": {},
   "devDependencies": {
+    "@vue/cli-plugin-typescript": "^4.5.10",
+    "@vue/cli-service": "^4.5.10",
     "@welldone-software/webpack-monorepo-resolver": "^0.4.0",
     "babel-loader": "^8.2.2",
     "chai": "^4.2.0",
     "istanbul-instrumenter-loader": "^3.0.1",
-    "karma": "^6.0.0",
+    "karma": "^6.0.1",
     "karma-chai": "^0.1.0",
     "karma-chrome-launcher": "^3.1.0",
     "karma-coverage-istanbul-reporter": "^3.0.3",
@@ -44,10 +46,10 @@
     "karma-webpack": "^5.0.0-alpha.5",
     "lerna": "^3.22.1",
     "mocha": "^8.2.1",
-    "sort-package-json": "^1.44.0",
-    "webpack": "^5.14.0"
+    "sort-package-json": "^1.48.1",
+    "webpack": "^5.17.0"
   },
   "optionalDependencies": {
-    "vuepress": "^1.5.3"
+    "vuepress": "^1.8.0"
   }
 }

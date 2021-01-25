@@ -1,35 +1,51 @@
-import {AnyFunc} from '@/types'
-import {Triggers} from './types'
-import {actor} from '@/utils'
+import {AnyFunction} from '@/types'
+import {actor} from './actor'
 
-interface TriggerOptions<N, S, T> {
-  triggers: Triggers<N, S, any>
+export interface TriggerOptions<N, S, T> {
+  before?: (type: N, name: string, args: any[], original: T, wrapper: T) => any
+  after?: (namespace: string, name: string, args: any[], state: S) => any
   state?: S
   action: T,
   namespace?: string
   name?: string
   type: N
-  firstArgs?: any[]
+  argsGetter?: (args: any[]) => any[]
 }
 
-type CreateTriggerOptions<N, S> = Omit<TriggerOptions<N, S, any>, 'action' | 'name'>
+export type CreateTriggerOptions<N, S> = Omit<TriggerOptions<N, S, any>, 'action' | 'name'>
 
-export const createObserverTrigger = <N, S>(options: CreateTriggerOptions<N, S>) => {
-  const {type, state, triggers, namespace, firstArgs} = options
-  return <T extends AnyFunc>(action: T, name: string = 'unknown'): T =>
-    observerTrigger({
-      triggers, state, action, namespace, name, type, firstArgs,
+export const createHookedFunction = <N, S>(options: CreateTriggerOptions<N, S>) => {
+  return <T extends AnyFunction>(action: T, name: string = 'unknown'): T =>
+    hookedFunction({
+      ...options,
+      action,
+      name,
     })
 }
 
-export const observerTrigger = <N, S, T extends AnyFunc>(options: TriggerOptions<N, S, T>): T => {
-  const {namespace = 'unknown', name = 'unknown', action, state = {} as S, triggers, type, firstArgs} = options
+export const hookedFunction = <N, S, T extends AnyFunction>(options: TriggerOptions<N, S, T>): T => {
+  const {
+    namespace = 'unknown',
+    name = 'unknown',
+    action,
+    state = {} as S,
+    before,
+    after,
+    type,
+    argsGetter,
+  } = options
 
-  const calledArgs = (action: T, args: Parameters<T>) => [type, name, args, action, wrapper]
+  const beforeArgsGetter = (action: T, args: Parameters<T>) => [type, name, args, action, wrapper]
 
-  const actedArgs = (action: T, args: Parameters<T>) => [namespace, name, args, state]
+  const afterArgsGetter = (action: T, args: Parameters<T>) => [namespace, name, args, state]
 
-  const wrapper = actor(action, firstArgs, {...triggers, calledArgs, actedArgs})
+  const wrapper = actor(action, {
+    before,
+    after,
+    argsGetter,
+    beforeArgsGetter,
+    afterArgsGetter,
+  })
 
   return wrapper
 }
