@@ -427,17 +427,68 @@ const FooComponent = defineComponent(() => {
 })
 ```
 
+## Packing actions, mutations and computes example
+
+```typescript
+const fakeRequest = (name: string) => Promise.resolve(name)
+
+const profile = createStore({
+  name: 'foo'
+})
+
+const computes = profile.computes({
+  getDecoName(state) {
+    return state.name + '~'
+  }
+})
+
+const mutations = profile.mutaions({
+  setName(state, name: string) {
+    state.name = name
+  }
+})
+
+const actions = profile.actions({
+  async updateName(name: string) {
+    const result = await fakeRequest(name)
+    mutations.setName(result)
+  }
+})
+
+export default {
+  state: profile.state,
+  computes,
+  mutations,
+  actions,
+}
+
+```
+
 ## Local Store (WIP)
 
 ```typescript
-const {provideStore, injectStore} = createContextStore()
+const profileStore = createLocalStore({
+  name: 'foo',
+})
+
+const mutations = profileStore.mutations({
+  setName(state, name: string) {
+    state.name = name
+  }
+})
+
+
+export const profilePack = {
+  provideState: profileStore.provideState,
+  injectState: profileStore.injectState,
+  mutations,
+}
+
 
 const FooComponent = defineComponent(() => {
-  const store = provideStore({
-    foo: 'foo'
-  })
+  const profile = profilePack.provideState()
 
-  const foo = computed(() => (store.state.foo))
+  const foo = computed(() => (profile.name))
 
   return () => (
     h('div', () => [
@@ -448,12 +499,67 @@ const FooComponent = defineComponent(() => {
 })
 
 const BarComponent = defineComponent(() => {
-  const store = injectStore()
-  const foo = computed(() => (store.state.foo))
+  const profile = profilePack.injectState()
+  
+  const foo = computed(() => (profile.name))
+  
   return () => (
-    h('div', foo)
+    h('div', [
+      h('button', {onclick: () => profilePack.mutations.setName('bar')})
+    ])
   )
 })
+```
+
+## Create the pack in easy way (WIP)
+
+```typescript
+
+const profileStore = createStore({
+  name: 'foo',
+})
+
+export default profileStore.pack({
+  mutations: {
+    setName(state, name: string) {
+      state.name = name
+    }
+  }
+})
+```
+```typescript
+
+const profileLocalStore = createLocalStore({
+  name: 'foo',
+})
+
+export default profileLocalStore.pack({
+  mutations: {
+    setName(state, name: string) {
+      state.name = name
+    }
+  }
+})
+```
+
+## Nest (WIP)
+
+```typescript
+
+const profileStore = createStore({
+  name: 'foo',
+})
+
+const skillStore = createStore({
+  skills: ['foo'],
+})
+
+profileStore.nest({
+  skill: skillStore,
+})
+
+// profile.state.skill.skills === ['foo']
+
 ```
 
 ## Supporting DevTool ?
