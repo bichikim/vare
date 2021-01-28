@@ -2,9 +2,9 @@
 
 Vue (Vue 3.x) Share State for a vue component
 
-Prerelease version!
+This is a Prerelease version!
 
-This Vare works fine, however there may be some unknown bugs.
+This Vare works fine, however there are may be some unknown bugs.
 (Unit tests have not been completed yet.)
 
 ## What is this?
@@ -89,43 +89,104 @@ export const FooComponent = defineComponent((props) => {
 
 ## Action
 
+store/profile.ts
 ```typescript
 import {createStore} from './src/index'
 
-
-const store = createStore({
-  foo: 'foo',
+const profile = createStore({
+  name: 'foo',
 })
 
 // state like Vuex state
-const state = store.state
+export default profile.state
 
 // mutation like Vuex Mutation
-const setFoo = store.mutation((state, name: string) => (state.foo = name))
+export const setName = profile.mutation((state, name: string) => (state.foo = name))
 
 // mock api request
 const request = (name: string) => (Promise.resolve(name))
 
 // action like Vuex Action
-const updateFoo = store.action(async (name) => {
+export const updateName = profile.action(async (name) => {
   const result = await request(name)
   setFoo(result)
 })
 
+```
+views/Profile.ts
+```typescript
+import profile, {updateName} from 'store/profile'
+import {h, defineComponent, computed, ref} from 'vue'
+
 // using state in a components
-export const FooComponent = defineComponent((props) => {
-  const foo = computed(() => (state.name))
+export const Profile = defineComponent((props) => {
+  const name = computed(() => (profile.name))
+  
   return () => {
-    return h('div', 
+    return h('div',
       h(Fragment, [
-        h('span', foo.value),
-        h('button', {onclick: () => updateFoo('bar')}, 'click')
+        h('span', name.value),
+        h('button', {onclick: () => updateName('bar')}, 'click')
       ])
     )
   }
 })
 
+```
 
+## Compute (Getter)
+
+store/profile.ts
+```typescript
+import {createStore} from './src/index'
+import {Ref} from 'vue'
+
+const profile = createStore({
+  name: 'foo',
+})
+
+// state like Vuex state
+export default profile.state
+
+// mutation like Vuex Mutation
+export const setName = profile.mutation((state, name: string) => (state.foo = name))
+
+export const getDecoName = profile.compute((state) => (`~~${state.foo}~~`))
+
+export const getCustomDecoName = profile.compute((state, deco: string) => `${deco}${state.foo}${deco}`)
+
+export const getReactiveCustomDecoName = profile.compute((state, deco: Ref<string>) => {
+  return `${deco.value}${state.name}${deco.value}`
+})
+```
+
+views/Profile.ts
+```typescript
+import profile, {getDecoName, getCustomDecoName, getReactiveCustomDecoName, setName} from 'store/profile'
+import {h, defineComponent, computed, ref} from 'vue'
+
+// using state in a components
+export const Profile = defineComponent((props) => {
+  const decoName = getDecoName()
+  const customDecoName = getCustomDecoName('++')
+  const customDeco = ref('--')
+  const customReactiveDecoName = getReactiveCustomDecoName(customDeco)
+
+  function handleInput(event) {
+    customDeco.value = event.target.value
+  }
+  
+  return () => {
+    return h('div',
+      h(Fragment, [
+        h('span', decoName.value), // ~~foo~~
+        h('span', customDecoName.value), // ++foo++
+        h('input', {onInput: handleInput, value: customDeco.value}), // --foo--
+        h('button', {onclick: () => setName('bar')}, 'click')
+      ])
+    )
+  }
+})
 ```
 
 ## Subscribe
@@ -155,7 +216,7 @@ store.unsubscribe(myActionSubscribe, 'action')
 
 ```
 
-## Mutations & actions
+## Mutations, Actions, Computes
 ```typescript
 import {createStore, Fragment} from './src/index'
 
@@ -184,6 +245,16 @@ const {actFoo, actBar} = store.actions({
   },
   actBar(name) {
     setBar(name)
+  }
+})
+
+// computes
+const {getDecoFoo, getDecoBar} = store.actions({
+  getDecoFoo(state) {
+    return `~~${state.foo}~~`
+  },
+  getDecoBar(state) {
+    return `~~${state.bar}~~`
   }
 })
 

@@ -31,12 +31,12 @@ module.exports = {
       'error', {
         anonymous: 'always', named: 'never', asyncArrow: 'always',
       }],
-    "@typescript-eslint/explicit-module-boundary-types": 'off',
+    '@typescript-eslint/explicit-module-boundary-types': 'off',
     '@typescript-eslint/no-explicit-any': 'off',
     '@typescript-eslint/no-inferrable-types': 'off',
     '@typescript-eslint/no-unused-expressions': ['error', {
-        allowTernary: true,
-        allowShortCircuit: true,
+      allowTernary: true,
+      allowShortCircuit: true,
     }],
     '@typescript-eslint/member-delimiter-style': 'off',
   },

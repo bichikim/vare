@@ -17,16 +17,6 @@ export type CreateTriggerOptions<N, S> = Omit<TriggerOptions<N, S, any>, 'action
 
 export type ActionWrap<T extends AnyFunction> = (function_: T) => T
 
-export const createHookedFunction = <N, S>(options: CreateTriggerOptions<N, S>) => {
-  return <T extends AnyFunction>(action: T, wrap?: ActionWrap<T>, name: string = 'unknown'): T =>
-    hookedFunction({
-      ...options,
-      wrap,
-      action,
-      name,
-    })
-}
-
 export const hookedFunction = <N, S, T extends AnyFunction>(options: TriggerOptions<N, S, T>): T => {
   const {
     namespace = 'unknown',
@@ -40,18 +30,24 @@ export const hookedFunction = <N, S, T extends AnyFunction>(options: TriggerOpti
     argsGetter,
   } = options
 
-  const beforeArgsGetter = (action: T, args: Parameters<T>) => [type, name, args, action, wrapper]
-
-  const afterArgsGetter = (action: T, args: Parameters<T>) => [namespace, name, args, state]
-
   const wrapper = actor(action, {
     before,
     after,
     wrap,
     argsGetter,
-    beforeArgsGetter,
-    afterArgsGetter,
+    beforeArgsGetter: (action: T, args: Parameters<T>) => [type, name, args, action, wrapper],
+    afterArgsGetter: (action: T, args: Parameters<T>) => [namespace, name, args, state],
   })
 
   return wrapper
+}
+
+export const createHookedFunction = <N, S>(options: CreateTriggerOptions<N, S>) => {
+  return <T extends AnyFunction>(action: T, wrap?: ActionWrap<T>, name: string = 'unknown'): T =>
+    hookedFunction({
+      ...options,
+      wrap,
+      action,
+      name,
+    })
 }
