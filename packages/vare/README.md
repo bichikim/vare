@@ -249,7 +249,7 @@ const {actFoo, actBar} = store.actions({
 })
 
 // computes
-const {getDecoFoo, getDecoBar} = store.actions({
+const {getDecoFoo, getDecoBar} = store.computes({
   getDecoFoo(state) {
     return `~~${state.foo}~~`
   },
