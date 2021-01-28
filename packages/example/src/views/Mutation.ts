@@ -9,6 +9,7 @@ export default defineComponent({
     }
 
     return () => {
+      console.log(name.value)
       return h('div', [
         h('span', name.value),
         h('button', {onclick: handleClick}, 'add'),

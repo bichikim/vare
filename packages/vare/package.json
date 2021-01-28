@@ -1,6 +1,6 @@
 {
   "name": "vare",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": false,
   "description": "share state for vue component ",
   "keywords": [
@@ -45,6 +45,7 @@
   },
   "devDependencies": {
     "tslib": "^2.1.0",
+    "webpack-bundle-analyzer": "^4.4.0",
     "@babel/core": "^7.11.1",
     "@babel/preset-typescript": "^7.10.4",
     "@babel/register": "^7.10.5",
