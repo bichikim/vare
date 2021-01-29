@@ -562,6 +562,12 @@ profileStore.nest({
 
 ```
 
-## Supporting DevTool ?
+## Supporting Vue DevTool ?
 
-Yes (WIP)
+Nope!
+
+However, I will create a browser extension
+
+see the session Storage while I make that
+
+![example-session](./media/session-storage.png)

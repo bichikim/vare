@@ -6,6 +6,8 @@ import {createHookedFunction} from './observer-trigger'
 import {AnyFunction, AnyObject, PromiseAnyFunc, State, DropParameters, OneAndAnyFunc} from './types'
 import {executeRecodeFunctions} from './execute-recode-functions'
 
+let storeUid = 0
+
 export const INIT = 'init'
 
 export const ACTION = 'action'
@@ -57,7 +59,7 @@ export const createStore = <S extends AnyObject>(
   state: S,
   options: StoreOptions = {},
 ): Store<S> => {
-  const {name: namespace = 'unknown'} = options
+  const {name: namespace = String(storeUid += 1)} = options
   const originalState = {...state}
   const subscribe = createSubscribe<StoreSubscribeFunc<S>, StoreSubscribeNames>(
     storeSubscribeNames,
@@ -73,7 +75,7 @@ export const createStore = <S extends AnyObject>(
 
   initState()
 
-  _triggerDevToolInit(reactiveState)
+  _triggerDevToolInit(namespace, reactiveState)
 
   const actMutation = createHookedFunction<StoreSubscribeNames, S>({
     namespace,

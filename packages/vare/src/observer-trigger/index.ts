@@ -1,6 +1,8 @@
 import {AnyFunction} from '@/types'
 import {actor} from './actor'
 
+let uid = 0
+
 export interface TriggerOptions<N, S, T extends AnyFunction> {
   before?: (type: N, name: string, args: any[], original: T, wrapper: T) => any
   after?: (namespace: string, name: string, args: any[], state: S) => any
@@ -43,7 +45,7 @@ export const hookedFunction = <N, S, T extends AnyFunction>(options: TriggerOpti
 }
 
 export const createHookedFunction = <N, S>(options: CreateTriggerOptions<N, S>) => {
-  return <T extends AnyFunction>(action: T, wrap?: ActionWrap<T>, name: string = 'unknown'): T =>
+  return <T extends AnyFunction>(action: T, wrap?: ActionWrap<T>, name: string = String(uid += 1)): T =>
     hookedFunction({
       ...options,
       wrap,
