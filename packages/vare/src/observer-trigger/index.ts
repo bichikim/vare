@@ -1,35 +1,55 @@
-import {AnyFunc} from '@/types'
-import {Triggers} from './types'
-import {actor} from '@/utils'
+import {AnyFunction} from '@/types'
+import {actor} from './actor'
 
-interface TriggerOptions<N, S, T> {
-  triggers: Triggers<N, S, any>
+let uid = 0
+
+export interface TriggerOptions<N, S, T extends AnyFunction> {
+  before?: (type: N, name: string, args: any[], original: T, wrapper: T) => any
+  after?: (namespace: string, name: string, args: any[], state: S) => any
+  wrap?: ActionWrap<T>
   state?: S
   action: T,
   namespace?: string
   name?: string
   type: N
+  argsGetter?: (args: any[]) => any[]
 }
 
-type CreateTriggerOptions<N, S> = Omit<TriggerOptions<N, S, any>, 'action' | 'name'>
+export type CreateTriggerOptions<N, S> = Omit<TriggerOptions<N, S, any>, 'action' | 'name'>
 
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export const createObserverTrigger = <N, S>(options: CreateTriggerOptions<N, S>) => {
-  const {type, state, triggers, namespace} = options
-  return <T extends AnyFunc>(action: T, name: string = 'unknown'): T =>
-    observerTrigger({
-      triggers, state, action, namespace, name, type,
-    })
-}
+export type ActionWrap<T extends AnyFunction> = (function_: T) => T
 
-export const observerTrigger = <N, S, T extends AnyFunc>(options: TriggerOptions<N, S, T>): T => {
-  const {namespace = 'unknown', name = 'unknown', action, state = {} as S, triggers, type} = options
+export const hookedFunction = <N, S, T extends AnyFunction>(options: TriggerOptions<N, S, T>): T => {
+  const {
+    namespace = 'unknown',
+    name = 'unknown',
+    wrap,
+    action,
+    state = {} as S,
+    before,
+    after,
+    type,
+    argsGetter,
+  } = options
 
-  const calledArgs = (action: T, args: Parameters<T>) => [type, name, args, action, wrapper]
-
-  const actedArgs = (action: T, args: Parameters<T>) => [namespace, name, args, state]
-
-  const wrapper = actor(action, {...triggers, calledArgs, actedArgs})
+  const wrapper = actor(action, {
+    before,
+    after,
+    wrap,
+    argsGetter,
+    beforeArgsGetter: (action: T, args: Parameters<T>) => [type, name, args, action, wrapper],
+    afterArgsGetter: (action: T, args: Parameters<T>) => [namespace, name, args, state],
+  })
 
   return wrapper
+}
+
+export const createHookedFunction = <N, S>(options: CreateTriggerOptions<N, S>) => {
+  return <T extends AnyFunction>(action: T, wrap?: ActionWrap<T>, name: string = String(uid += 1)): T =>
+    hookedFunction({
+      ...options,
+      wrap,
+      action,
+      name,
+    })
 }

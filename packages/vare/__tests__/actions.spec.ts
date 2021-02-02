@@ -1,4 +1,4 @@
-import {createStore} from 'vare'
+import {createStore} from '../src/index'
 
 describe('store actions', function test() {
   it('should act getFoo & getBar ', async function test() {
@@ -8,11 +8,11 @@ describe('store actions', function test() {
     })
     const fakeRequest = (name) => (Promise.resolve(name))
     const {setFoo, setBar} = store.mutations({
-      setFoo(name) {
-        store.state.foo = name
+      setFoo(state, name: string) {
+        state.foo = name
       },
-      setBar(name) {
-        store.state.bar = name
+      setBar(state, name: string) {
+        state.bar = name
       },
     })
 

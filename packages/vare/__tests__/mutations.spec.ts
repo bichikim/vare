@@ -1,4 +1,4 @@
-import {createStore} from 'vare'
+import {createStore} from '../src/index'
 
 describe('store mutations', function test() {
   it('should mutate foo state', function test() {
@@ -8,11 +8,11 @@ describe('store mutations', function test() {
     })
 
     const {setFoo, setBar} = store.mutations({
-      setFoo(name) {
-        store.state.foo = name
+      setFoo(state, name) {
+        state.foo = name
       },
-      setBar(name) {
-        store.state.bar = name
+      setBar(state, name) {
+        state.bar = name
       },
     })
 

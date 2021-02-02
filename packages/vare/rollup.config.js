@@ -1,6 +1,7 @@
 import ts from 'rollup-plugin-typescript2'
 import del from 'rollup-plugin-delete'
 import {terser} from 'rollup-plugin-terser'
+import ttypescript from 'ttypescript'
 
 const name = 'vare'
 const globals = {
@@ -39,6 +40,7 @@ export default {
   plugins: [
     del({targets: 'dist/*'}),
     ts({
+      typescript: ttypescript,
       tsconfigOverride: {
         compilerOptions: {
           declaration: true,

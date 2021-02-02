@@ -2,9 +2,9 @@
 
 Vue (Vue 3.x) Share State for a vue component
 
-Prerelease version!
+This is a Prerelease version!
 
-This Vare works fine, however there may be some unknown bugs.
+This Vare works fine, however there are maybe some unknown bugs.
 (Unit tests have not been completed yet.)
 
 ## What is this?
@@ -13,46 +13,22 @@ Vare works like Vuex.
 
 However, this is less painful to create a Store than Vuex.
 
-## Use Vare with Vue (Vue 3.0)
+## Use Vare with Vue (Vue 3.0 or Vue 2 with @vue/composition-api) 
 
 ```typescript
-import {createApp} from 'vue'
-import App from './App'
-import {Vare} from 'vare'
 
-const vare = new Vare()
+import {createStore} from 'vare'
 
-createApp(App).use(vare).mount('#app')
-```
-Many vue roots
-```typescript
-import {createApp} from 'vue'
-import App from './App'
-import {Vare} from 'vare'
-
-const vare = new Vare()
-const subVare = new Vare()
-
-createApp(App).use(vare).mount('#app')
-createApp(App).use(subVare).mount('#sub-app')
-
-```
-
-With plugins
-```typescript
-import {createApp} from 'vue'
-import App from './App'
-import {Vare} from 'vare'
-
-const myPlugins = (vare: Vare) => {
-  // vare.subscribe(...)
-}
-
-const vare = new Vare({
-  plugins: [myPlugins]
+export const store = createStore({
+  name: 'foo',
 })
 
-createApp(App).use(vare).mount('#app')
+export const FooComponent = defineComponent((props) => {
+  const foo = computed(() => (state.name))
+  return () => {
+    return h('span', foo.value)
+  }
+})
 
 ```
 
@@ -94,7 +70,7 @@ const store = createStore({
 const state = store.state
 
 // mutation like Vuex Mutation
-const setFoo = store.mutation((name: string) => (state.foo = name))
+const setFoo = store.mutation((state, name: string) => (state.foo = name))
 
 // using state in a components
 export const FooComponent = defineComponent((props) => {
@@ -113,43 +89,104 @@ export const FooComponent = defineComponent((props) => {
 
 ## Action
 
+store/profile.ts
 ```typescript
 import {createStore} from './src/index'
 
-
-const store = createStore({
-  foo: 'foo',
+const profile = createStore({
+  name: 'foo',
 })
 
 // state like Vuex state
-const state = store.state
+export default profile.state
 
 // mutation like Vuex Mutation
-const setFoo = store.mutation((name: string) => (state.foo = name))
+export const setName = profile.mutation((state, name: string) => (state.foo = name))
 
 // mock api request
 const request = (name: string) => (Promise.resolve(name))
 
 // action like Vuex Action
-const updateFoo = store.action(async (name) => {
+export const updateName = profile.action(async (name) => {
   const result = await request(name)
   setFoo(result)
 })
 
+```
+views/Profile.ts
+```typescript
+import profile, {updateName} from 'store/profile'
+import {h, defineComponent, computed, ref} from 'vue'
+
 // using state in a components
-export const FooComponent = defineComponent((props) => {
-  const foo = computed(() => (state.name))
+export const Profile = defineComponent((props) => {
+  const name = computed(() => (profile.name))
+  
   return () => {
-    return h('div', 
+    return h('div',
       h(Fragment, [
-        h('span', foo.value),
-        h('button', {onclick: () => updateFoo('bar')}, 'click')
+        h('span', name.value),
+        h('button', {onclick: () => updateName('bar')}, 'click')
       ])
     )
   }
 })
 
+```
 
+## Compute (Getter)
+
+store/profile.ts
+```typescript
+import {createStore} from './src/index'
+import {Ref} from 'vue'
+
+const profile = createStore({
+  name: 'foo',
+})
+
+// state like Vuex state
+export default profile.state
+
+// mutation like Vuex Mutation
+export const setName = profile.mutation((state, name: string) => (state.foo = name))
+
+export const getDecoName = profile.compute((state) => (`~~${state.foo}~~`))
+
+export const getCustomDecoName = profile.compute((state, deco: string) => `${deco}${state.foo}${deco}`)
+
+export const getReactiveCustomDecoName = profile.compute((state, deco: Ref<string>) => {
+  return `${deco.value}${state.name}${deco.value}`
+})
+```
+
+views/Profile.ts
+```typescript
+import profile, {getDecoName, getCustomDecoName, getReactiveCustomDecoName, setName} from 'store/profile'
+import {h, defineComponent, computed, ref} from 'vue'
+
+// using state in a components
+export const Profile = defineComponent((props) => {
+  const decoName = getDecoName()
+  const customDecoName = getCustomDecoName('++')
+  const customDeco = ref('--')
+  const customReactiveDecoName = getReactiveCustomDecoName(customDeco)
+
+  function handleInput(event) {
+    customDeco.value = event.target.value
+  }
+  
+  return () => {
+    return h('div',
+      h(Fragment, [
+        h('span', decoName.value), // ~~foo~~
+        h('span', customDecoName.value), // ++foo++
+        h('input', {onInput: handleInput, value: customDeco.value}), // --foo--
+        h('button', {onclick: () => setName('bar')}, 'click')
+      ])
+    )
+  }
+})
 ```
 
 ## Subscribe
@@ -179,25 +216,7 @@ store.unsubscribe(myActionSubscribe, 'action')
 
 ```
 
-## Vare Subscribe
-
-```typescript
-import {createStore, createVare} from './src/index'
-
-const vare = createVare()
-
-const store = createStore({
-  foo: 'foo',
-}, {name: 'foo', vare})
-
-const mySubscribe = (...args) => {console.log(...args)}
-
-// subscribe mutation
-vare.subscribe(mySubscribe)
-
-```
-
-## Mutations
+## Mutations, Actions, Computes
 ```typescript
 import {createStore, Fragment} from './src/index'
 
@@ -209,13 +228,33 @@ const store = createStore({
 // state like Vuex state
 const state = store.state
 
-// mutation like Vuex Mutation
+// mutations
 const {setFoo, setBar} = store.mutations({
-  setFoo(name) {
+  setFoo(state, name) {
     state.foo = name
   },
-  setBar(name) {
+  setBar(state, name) {
     state.bar = name
+  }
+})
+
+// actions
+const {actFoo, actBar} = store.actions({
+  actFoo(name) {
+    setFoo(name)
+  },
+  actBar(name) {
+    setBar(name)
+  }
+})
+
+// computes
+const {getDecoFoo, getDecoBar} = store.computes({
+  getDecoFoo(state) {
+    return `~~${state.foo}~~`
+  },
+  getDecoBar(state) {
+    return `~~${state.bar}~~`
   }
 })
 
@@ -226,7 +265,7 @@ export const FooComponent = defineComponent((props) => {
     return h('div', 
       h(Fragment, [
         h('span', foo.value),
-        h('button', {onclick: () => setFoo('bar')}, 'click')
+        h('button', {onclick: () => actFoo('bar')}, 'click')
       ])
     )
   }
@@ -234,6 +273,301 @@ export const FooComponent = defineComponent((props) => {
 
 ```
 
-## Supporting DevTool ?
+## Why 
 
-Yes (WIP)
+Share state wherever you want
+
+Recoil x Vuex x Immer
+
+### Recoil
+
+
+```typescript
+function App() {
+  return (
+    h(RecoilRoot, null,
+      h(FooComponent),
+    )
+  )
+}
+
+// ....
+
+const _state = atom({
+  key: '...',
+  default: {foo: 'foo'}
+})
+
+const foo = selector({
+  key: '...',
+  get: ({get}) => {
+    return get(_state).foo
+  },
+  set: ({set, get}, name) => {
+    set(_state, {
+      ...get(_state),
+      foo: name,
+    })
+  }
+})
+
+function FooComponent() {
+  const state = useRecoilValue(_state)
+  
+  return (
+    h('div', null, state.foo)
+  )
+}
+
+function BarComponent() {
+  const setState = useSetRecoilState(foo)
+
+  return (
+    h('div', {onClick: () => setState('bar')})
+  )
+}
+
+```
+In the vare way
+```typescript
+// no need a context
+
+const store = createStore({
+  foo: 'foo',
+})
+
+const setFoo = store.mutation((state, name) => {
+  state.foo = name
+})
+
+const App = defineComponent(() => {
+  return () => h(FooComponent)
+})
+
+const FooComponent = defineComponent(() => {
+  const foo = computed(() => (store.state.foo))
+  
+  return () => (
+    h('div', foo)
+  )
+})
+
+const BarComponent = defineComponent(() => {
+  return () => {
+    h('div', {onclick: () => setFoo('bar')})
+  }
+})
+
+```
+
+### Immer 
+
+```typescript
+const state = {
+  foo: 'foo'
+}
+
+produce(state, (draft) => {
+  draft.foo = 'bar'
+})
+
+```
+
+In the Vare way
+```typescript
+const store = createStore({
+  foo: 'foo',
+})
+
+store.state.foo = 'bar'
+```
+
+### Vuex
+
+```typescript
+const store = createStore({
+  state () {
+    return {
+      count: 0
+    }
+  },
+  mutations: {
+    increment (state) {
+      state.count++
+    }
+  }
+})
+
+// need to setup
+app.use(store)
+
+const FooComponent = defineComponent(() => {
+  const store = useStore()
+
+  return () => (
+    h('div', store.state.foo)
+  )
+})
+```
+
+In the Vare way
+```typescript
+// no need to setup
+
+const store = createStore({
+  foo: 'foo',
+})
+
+const FooComponent = defineComponent(() => {
+  const foo = computed(() => (store.state.foo))
+
+  return () => (
+    h('div', foo)
+  )
+})
+```
+
+## Packing actions, mutations and computes example
+
+```typescript
+const fakeRequest = (name: string) => Promise.resolve(name)
+
+const profile = createStore({
+  name: 'foo'
+})
+
+const computes = profile.computes({
+  getDecoName(state) {
+    return state.name + '~'
+  }
+})
+
+const mutations = profile.mutaions({
+  setName(state, name: string) {
+    state.name = name
+  }
+})
+
+const actions = profile.actions({
+  async updateName(name: string) {
+    const result = await fakeRequest(name)
+    mutations.setName(result)
+  }
+})
+
+export default {
+  state: profile.state,
+  computes,
+  mutations,
+  actions,
+}
+
+```
+
+## Local Store (WIP)
+
+```typescript
+const profileStore = createLocalStore({
+  name: 'foo',
+})
+
+const mutations = profileStore.mutations({
+  setName(state, name: string) {
+    state.name = name
+  }
+})
+
+
+export const profilePack = {
+  provideState: profileStore.provideState,
+  injectState: profileStore.injectState,
+  mutations,
+}
+
+
+const FooComponent = defineComponent(() => {
+  const profile = profilePack.provideState()
+
+  const foo = computed(() => (profile.name))
+
+  return () => (
+    h('div', () => [
+      foo,
+      h(BarComponent)
+    ])
+  )
+})
+
+const BarComponent = defineComponent(() => {
+  const profile = profilePack.injectState()
+  
+  const foo = computed(() => (profile.name))
+  
+  return () => (
+    h('div', [
+      h('button', {onclick: () => profilePack.mutations.setName('bar')})
+    ])
+  )
+})
+```
+
+## Create the pack in easy way (WIP)
+
+```typescript
+
+const profileStore = createStore({
+  name: 'foo',
+})
+
+export default profileStore.pack({
+  mutations: {
+    setName(state, name: string) {
+      state.name = name
+    }
+  }
+})
+```
+```typescript
+
+const profileLocalStore = createLocalStore({
+  name: 'foo',
+})
+
+export default profileLocalStore.pack({
+  mutations: {
+    setName(state, name: string) {
+      state.name = name
+    }
+  }
+})
+```
+
+## Nest (WIP)
+
+```typescript
+
+const profileStore = createStore({
+  name: 'foo',
+})
+
+const skillStore = createStore({
+  skills: ['foo'],
+})
+
+profileStore.nest({
+  skill: skillStore,
+})
+
+// profile.state.skill.skills === ['foo']
+
+```
+
+## Supporting Vue DevTool ?
+
+Nope!
+
+However, I will create a browser extension
+
+see the session Storage while I make that
+
+![example-session](./media/session-storage.png)

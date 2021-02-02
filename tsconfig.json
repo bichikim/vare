@@ -123,7 +123,7 @@
     /* it will use that information to detect the least costly way to type-check and emit changes to your project. */
     "incremental": false,
     /* Do not emit output */
-    "noEmit": true,
+    // "noEmit": true,
     "paths": {
       "@/*": [
         "packages/vare/src/*",
@@ -133,10 +133,11 @@
     "plugins": [{"transform": "@zerollup/ts-transform-paths"}]
   },
   "include": [
+    "test.ts",
     "packages/vare/src/**/*.ts",
     "packages/vare/src/**/*.tsx",
-    "packages/example/src/**/*.tsx",
-    "packages/example/src/**/*.tsx"
+    "packages/vare/tests/**/*.ts",
+    "packages/vare/tests/**/*.tsx",
   ],
   "exclude": [
     "node_modules"

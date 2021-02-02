@@ -1,17 +1,27 @@
-import {_triggerDevToolAction, _triggerDevToolMutation} from '@/devtool'
-import {createSubscribe, Subscribe} from '@/subscribe'
-import {reactive} from 'vue'
-import {createObserverTrigger} from './observer-trigger'
-import {AnyFunc, AnyObject, PromiseAnyFunc, State} from './types'
-import {wraps} from '@/utils'
+import {ComputedRef} from '@vue/reactivity'
+import {_triggerDevToolAction, _triggerDevToolMutation, _triggerDevToolInit} from './devtool'
+import {createSubscribe, Subscribe} from './subscribe'
+import {reactive, computed} from 'vue-demi'
+import {createHookedFunction} from './observer-trigger'
+import {AnyFunction, AnyObject, PromiseAnyFunc, State, DropParameters, OneAndAnyFunc} from './types'
+import {executeRecodeFunctions} from './execute-recode-functions'
+
+let storeUid = 0
 
 export const INIT = 'init'
+
 export const ACTION = 'action'
+
 export const MUTATION = 'mutation'
+
 export const storeSubscribeNames: StoreSubscribeNames[] = [INIT, ACTION, MUTATION]
+
 export const defaultSubscribeName = MUTATION
-export type StoreSubscribeNames = 'init' | 'action' | 'mutation'
+
+export type StoreSubscribeNames = 'init' | 'action' | 'mutation' | 'memo'
+
 export type ClearNames = 'state' | StoreSubscribeNames
+
 export type ActionFunc = (...args: any[]) => PromiseLike<any> | any
 
 export type StoreSubscribeFunc<S> = (type: StoreSubscribeNames, name: string, args: any[], state: State<S>) => any
@@ -26,15 +36,19 @@ export interface StoreOptions {
 export interface Store<S extends AnyObject> extends Subscribe<any, any> {
   readonly state: State<S>
 
-  mutations<T extends Record<string, AnyFunc>>(mutationTree: T): T
+  mutations<K extends string, F extends OneAndAnyFunc<S>>(mutationTree: Record<K, F>): Record<K, (...args: DropParameters<F, S>) => ReturnType<F>>
 
-  mutation<T extends AnyFunc>(mutation: T, name?: string): T
+  mutation<A extends any[], R>(mutation: (state: S, ...args: A) => R, name?: string): (...args: A) => R
 
-  defineMutation<T extends AnyFunc>(mutation: T, name?: string): T
+  defineMutation<T extends AnyFunction>(mutation: T, name?: string): T
 
   actions<T extends Record<string, ActionFunc>>(actionTree: T): T
 
   action<T extends PromiseAnyFunc>(action: T, name?: string): T
+
+  computes<K extends string, F extends OneAndAnyFunc<S>>(memoTree: Record<K, F>, name?: string): Record<K, (...args: DropParameters<F, S>) => ComputedRef<ReturnType<F>>>
+
+  compute<A extends any[], R>(memo: (state: S, ...args) => R, name?: string): (...args: A) => ComputedRef<R>
 
   defineAction<T extends PromiseAnyFunc>(action: T, name?: string): T
 
@@ -45,7 +59,7 @@ export const createStore = <S extends AnyObject>(
   state: S,
   options: StoreOptions = {},
 ): Store<S> => {
-  const {name: namespace = 'unknown'} = options
+  const {name: namespace = String(storeUid += 1)} = options
   const originalState = {...state}
   const subscribe = createSubscribe<StoreSubscribeFunc<S>, StoreSubscribeNames>(
     storeSubscribeNames,
@@ -61,27 +75,44 @@ export const createStore = <S extends AnyObject>(
 
   initState()
 
-  const actMutation = createObserverTrigger<StoreSubscribeNames, S>({
+  _triggerDevToolInit(namespace, reactiveState)
+
+  const actMutation = createHookedFunction<StoreSubscribeNames, S>({
     namespace,
-    triggers: {called: subscribe.trigger, acted: _triggerDevToolMutation},
+    before: subscribe.trigger,
+    after: _triggerDevToolMutation,
     type: 'mutation',
     state: reactiveState,
+    argsGetter: (args) => [reactiveState, ...args],
   })
 
-  const actAction = createObserverTrigger<StoreSubscribeNames, S>({
+  const actAction = createHookedFunction<StoreSubscribeNames, S>({
     namespace,
-    triggers: {called: subscribe.trigger, acted: _triggerDevToolAction},
+    before: subscribe.trigger,
+    after: _triggerDevToolAction,
     type: 'action',
     state: reactiveState,
   })
 
-  const mutation = (mutation, name) => actMutation(mutation, name)
+  const actMemo = createHookedFunction<StoreSubscribeNames, S>({
+    namespace,
+    before: subscribe.trigger,
+    type: 'memo',
+    state: reactiveState,
+    argsGetter: (args) => [reactiveState, ...args],
+  })
 
-  const mutations = <T extends Record<string, AnyFunc>>(mutationTree: T): T => wraps(mutationTree, mutation)
+  const compute = (memo, name) => actMemo(memo, (function_) => (...args) => computed(() => function_(...args)), name)
 
-  const action = <T extends AnyFunc>(action: T, name?: string) => actAction(action, name)
+  const computes = (memoTree) => executeRecodeFunctions(memoTree, compute)
 
-  const actions = <T extends Record<string, ActionFunc>>(actionTree: T): T => wraps(actionTree, action)
+  const mutation = (mutation, name) => actMutation(mutation, undefined, name)
+
+  const mutations = (mutationTree) => executeRecodeFunctions(mutationTree, mutation)
+
+  const action = (action, name?) => actAction(action, undefined, name)
+
+  const actions = (actionTree) => executeRecodeFunctions(actionTree, action)
 
   const clear = (type: ClearNames): void => {
     switch (type) {
@@ -98,6 +129,8 @@ export const createStore = <S extends AnyObject>(
     get state() {
       return reactiveState
     },
+    compute,
+    computes,
     defineMutation: mutation,
     mutation,
     mutations,
