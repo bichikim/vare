@@ -18,7 +18,7 @@ export const storeSubscribeNames: StoreSubscribeNames[] = [INIT, ACTION, MUTATIO
 
 export const defaultSubscribeName = MUTATION
 
-export type StoreSubscribeNames = 'init' | 'action' | 'mutation' | 'memo'
+export type StoreSubscribeNames = 'init' | 'action' | 'mutation' | 'computation'
 
 export type ClearNames = 'state' | StoreSubscribeNames
 
@@ -97,7 +97,7 @@ export const createStore = <S extends AnyObject>(
   const actMemo = createHookedFunction<StoreSubscribeNames, S>({
     namespace,
     before: subscribe.trigger,
-    type: 'memo',
+    type: 'computation',
     state: reactiveState,
     argsGetter: (args) => [reactiveState, ...args],
   })
