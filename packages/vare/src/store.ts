@@ -1,12 +1,15 @@
-import {ComputedRef} from '@vue/reactivity'
+import {ComputedRef, Ref, UnwrapRef} from '@vue/reactivity'
 import {_triggerDevToolAction, _triggerDevToolMutation, _triggerDevToolInit} from './devtool'
 import {createSubscribe, Subscribe} from './subscribe'
 import {reactive, computed} from 'vue-demi'
 import {createHookedFunction} from './observer-trigger'
 import {AnyFunction, AnyObject, PromiseAnyFunc, State, DropParameters, OneAndAnyFunc} from './types'
 import {executeRecodeFunctions} from './execute-recode-functions'
+import {mayFunction} from './may-function'
 
 let storeUid = 0
+
+export type UnwrapNestedRefs<T> = T extends Ref ? T : UnwrapRef<T>;
 
 export const INIT = 'init'
 
@@ -55,25 +58,28 @@ export interface Store<S extends AnyObject> extends Subscribe<any, any> {
   clear(type: ClearNames): void
 }
 
+export type InitStateFunction<S> = () => S
+
 export const createStore = <S extends AnyObject>(
-  state: S,
+  initState: S | InitStateFunction<S>,
   options: StoreOptions = {},
 ): Store<S> => {
   const {name: namespace = String(storeUid += 1)} = options
-  const originalState = {...state}
+  const originalState = {...initState}
   const subscribe = createSubscribe<StoreSubscribeFunc<S>, StoreSubscribeNames>(
     storeSubscribeNames,
     defaultSubscribeName,
   )
 
-  let reactiveState = reactive(originalState)
+  let reactiveState: UnwrapNestedRefs<S>
 
-  const initState = () => {
-    reactiveState = reactive(originalState)
-    subscribe.trigger('init', namespace, [originalState], initState, initState)
+  const createReactiveState = () => {
+    const reactiveState = reactive(mayFunction(initState))
+    subscribe.trigger('init', namespace, [originalState], createReactiveState, createReactiveState)
+    return reactiveState
   }
 
-  initState()
+  reactiveState = createReactiveState()
 
   _triggerDevToolInit(namespace, reactiveState)
 
@@ -117,7 +123,7 @@ export const createStore = <S extends AnyObject>(
   const clear = (type: ClearNames): void => {
     switch (type) {
       case 'state':
-        initState()
+        reactiveState = createReactiveState()
         return
       default:
         subscribe.clear(type)

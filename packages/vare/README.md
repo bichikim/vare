@@ -479,7 +479,7 @@ const mutations = profileStore.mutations({
 
 
 export const profilePack = {
-  provideState: profileStore.provideState,
+  provideStore: profileStore.provideStore,
   injectState: profileStore.injectState,
   mutations,
 }
