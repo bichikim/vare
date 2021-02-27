@@ -27,6 +27,7 @@ describe('store subscribe', function test() {
     })
     const _setFoo = (state, name: string) => (state.foo = name)
     const _setBar = (state, name: number) => (state.bar = name)
+
     const {setBar, setFoo} = store.mutations({
       setFoo: _setFoo,
       setBar: _setBar,
@@ -49,7 +50,7 @@ describe('store subscribe', function test() {
     expect(subscribeCall1.args[1]).toEqual(['BAR'])
     await actFoo('ACT')
     const subscribeCall2 = subscribe2.getCall(0)
-    expect(subscribeCall2.args[0]).toBe('unknown')
+    expect(subscribeCall2.args[0]).toBe('unknown 2')
     expect(subscribeCall2.args[1]).toEqual(['ACT'])
   })
 })

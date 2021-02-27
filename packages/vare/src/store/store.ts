@@ -1,40 +1,18 @@
-import {ComputedRef, Ref, UnwrapRef} from '@vue/reactivity'
-import {_triggerDevToolAction, _triggerDevToolMutation, _triggerDevToolInit} from './devtool'
-import {createSubscribe, Subscribe} from './subscribe'
-import {reactive, computed} from 'vue-demi'
-import {trigger} from './observer-trigger'
-import {AnyFunction, AnyObject, PromiseAnyFunc, State, DropParameters, OneAndAnyFunc} from './types'
-import {executeFunctions} from 'src/execute-functions'
-import {mayFunction} from './may-function'
-
-let storeUid = 0
-
-export type UnwrapNestedRefs<T> = T extends Ref ? T : UnwrapRef<T>;
-
-export const INIT = 'init'
-
-export const ACTION = 'action'
-
-export const MUTATION = 'mutation'
+import {_triggerDevToolAction, _triggerDevToolInit, _triggerDevToolMutation} from '@/devtool'
+import {executeFunctions} from '@/execute-functions'
+import {mayFunction} from '@/may-function'
+import {act} from '@/observer-trigger'
+import {createSubscribe, Subscribe} from '@/subscribe'
+import {AnyFunction, AnyObject, DropParameters, OneAndAnyFunc, PromiseAnyFunc, State} from '@/types'
+import {getUnknownName} from '@/uid'
+import {ComputedRef} from '@vue/reactivity'
+import {computed, reactive} from 'vue-demi'
+import {ACTION, INIT, MUTATION} from './names'
+import {ActionFunc, ClearNames, StoreOptions, StoreSubscribeFunc, StoreSubscribeNames, UnwrapNestedRefs} from './types'
 
 export const storeSubscribeNames: StoreSubscribeNames[] = [INIT, ACTION, MUTATION]
 
 export const defaultSubscribeName = MUTATION
-
-export type StoreSubscribeNames = 'init' | 'action' | 'mutation' | 'computation'
-
-export type ClearNames = 'state' | StoreSubscribeNames
-
-export type ActionFunc = (...args: any[]) => PromiseLike<any> | any
-
-export type StoreSubscribeFunc<S> = (type: StoreSubscribeNames, name: string, args: any[], state: State<S>) => any
-
-export interface StoreOptions {
-  /**
-   * @default 'unknown'
-   */
-  name?: string
-}
 
 export interface Store<S extends AnyObject> extends Subscribe<any, any> {
   readonly state: State<S>
@@ -64,7 +42,7 @@ export const createStore = <S extends AnyObject>(
   initState: S | InitStateFunction<S>,
   options: StoreOptions = {},
 ): Store<S> => {
-  const {name: namespace = String(storeUid += 1)} = options
+  const {name: namespace = getUnknownName()} = options
   const originalState = {...initState}
   const subscribe = createSubscribe<StoreSubscribeFunc<S>, StoreSubscribeNames>(
     storeSubscribeNames,
@@ -83,40 +61,23 @@ export const createStore = <S extends AnyObject>(
 
   _triggerDevToolInit(namespace, reactiveState)
 
-  const actMutation = trigger<StoreSubscribeNames, S>({
-    namespace,
-    before: subscribe.trigger,
-    after: _triggerDevToolMutation,
-    type: 'mutation',
-    state: reactiveState,
-    argsGetter: (args) => [reactiveState, ...args],
-  })
-
-  const actAction = trigger<StoreSubscribeNames, S>({
-    namespace,
-    before: subscribe.trigger,
-    after: _triggerDevToolAction,
-    type: 'action',
-    state: reactiveState,
-  })
-
-  const actCompute = trigger<StoreSubscribeNames, S>({
-    namespace,
-    before: subscribe.trigger,
-    type: 'computation',
-    state: reactiveState,
-    argsGetter: (args) => [reactiveState, ...args],
-  })
-
-  const compute = (memo, name) => actCompute(memo, (function_) => (...args) => computed(() => function_(...args)), name)
+  const compute: AnyFunction = act({
+    before: (args, name) => subscribe.trigger('computation', name, args),
+  })((function_) => (...args) => computed(() => function_(...args)))([reactiveState])
 
   const computes = (memoTree) => executeFunctions(memoTree, compute)
 
-  const mutation = (mutation, name) => actMutation(mutation, undefined, name)
+  const mutation: AnyFunction = act({
+    before: (args, name) => subscribe.trigger('mutation', name, args),
+    after: (args, result, name) => _triggerDevToolMutation(namespace, name, args, reactiveState),
+  })()([reactiveState])
 
   const mutations = (mutationTree) => executeFunctions(mutationTree, mutation)
 
-  const action = (action, name?) => actAction(action, undefined, name)
+  const action: AnyFunction = act({
+    before: (args, name) => subscribe.trigger('action', name, args, reactiveState),
+    after: (args, result, name) => _triggerDevToolAction(namespace, name, args, reactiveState),
+  })()([])
 
   const actions = (actionTree) => executeFunctions(actionTree, action)
 
