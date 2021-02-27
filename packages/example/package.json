@@ -43,7 +43,6 @@
     "eslint-plugin-vue": "^7.0.0-0",
     "postcss-rtl": "^1.2.3",
     "stylus": "^0.54.7",
-    "stylus-loader": "^3.0.2",
-    "typescript": "~3.9.3"
+    "stylus-loader": "^3.0.2"
   }
 }

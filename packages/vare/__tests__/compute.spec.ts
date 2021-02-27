@@ -13,13 +13,13 @@ describe('store compute', function test() {
 
     const memoFoo = store.compute(doMemo)
 
-    expect(memoFoo().value).to.equal('foo~')
+    expect(memoFoo().value).toBe('foo~')
 
-    expect(memoFoo().value).to.equal('foo~')
+    expect(memoFoo().value).toBe('foo~')
 
     store.state.foo = 'bar'
 
-    expect(memoFoo().value).to.equal('bar~')
+    expect(memoFoo().value).toBe('bar~')
   })
   it('should create many memo', function test() {
     const store = createStore({
@@ -38,8 +38,8 @@ describe('store compute', function test() {
       memoFoo2: doMemo2,
     })
 
-    expect(memoFoo().value).to.equal('foo~')
-    expect(memoFoo2().value).to.equal('foo!')
+    expect(memoFoo().value).toBe('foo~')
+    expect(memoFoo2().value).toBe('foo!')
   })
 
   it('should return data with arg', function test() {
@@ -53,7 +53,7 @@ describe('store compute', function test() {
 
     const memoFoo = store.compute(doMemo)
 
-    expect(memoFoo('~').value).to.equal('foo~')
-    expect(memoFoo('!').value).to.equal('foo!')
+    expect(memoFoo('~').value).toBe('foo~')
+    expect(memoFoo('!').value).toBe('foo!')
   })
 })

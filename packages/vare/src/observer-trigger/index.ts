@@ -1,4 +1,4 @@
-import {AnyFunction} from '@/types'
+import {AnyFunction} from 'src/types'
 import {actor} from './actor'
 
 let uid = 0
@@ -15,7 +15,7 @@ export interface TriggerOptions<N, S, T extends AnyFunction> {
   argsGetter?: (args: any[]) => any[]
 }
 
-export type CreateTriggerOptions<N, S> = Omit<TriggerOptions<N, S, any>, 'action' | 'name'>
+
 
 export type ActionWrap<T extends AnyFunction> = (function_: T) => T
 
@@ -44,7 +44,9 @@ export const hookedFunction = <N, S, T extends AnyFunction>(options: TriggerOpti
   return wrapper
 }
 
-export const createHookedFunction = <N, S>(options: CreateTriggerOptions<N, S>) => {
+export type CreateTriggerOptions<N, S> = Omit<TriggerOptions<N, S, any>, 'action' | 'name'>
+
+export const trigger = <N, S>(options: CreateTriggerOptions<N, S>) => {
   return <T extends AnyFunction>(action: T, wrap?: ActionWrap<T>, name: string = String(uid += 1)): T =>
     hookedFunction({
       ...options,

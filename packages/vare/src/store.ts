@@ -2,9 +2,9 @@ import {ComputedRef, Ref, UnwrapRef} from '@vue/reactivity'
 import {_triggerDevToolAction, _triggerDevToolMutation, _triggerDevToolInit} from './devtool'
 import {createSubscribe, Subscribe} from './subscribe'
 import {reactive, computed} from 'vue-demi'
-import {createHookedFunction} from './observer-trigger'
+import {trigger} from './observer-trigger'
 import {AnyFunction, AnyObject, PromiseAnyFunc, State, DropParameters, OneAndAnyFunc} from './types'
-import {executeRecodeFunctions} from './execute-recode-functions'
+import {executeFunctions} from 'src/execute-functions'
 import {mayFunction} from './may-function'
 
 let storeUid = 0
@@ -83,7 +83,7 @@ export const createStore = <S extends AnyObject>(
 
   _triggerDevToolInit(namespace, reactiveState)
 
-  const actMutation = createHookedFunction<StoreSubscribeNames, S>({
+  const actMutation = trigger<StoreSubscribeNames, S>({
     namespace,
     before: subscribe.trigger,
     after: _triggerDevToolMutation,
@@ -92,7 +92,7 @@ export const createStore = <S extends AnyObject>(
     argsGetter: (args) => [reactiveState, ...args],
   })
 
-  const actAction = createHookedFunction<StoreSubscribeNames, S>({
+  const actAction = trigger<StoreSubscribeNames, S>({
     namespace,
     before: subscribe.trigger,
     after: _triggerDevToolAction,
@@ -100,7 +100,7 @@ export const createStore = <S extends AnyObject>(
     state: reactiveState,
   })
 
-  const actMemo = createHookedFunction<StoreSubscribeNames, S>({
+  const actCompute = trigger<StoreSubscribeNames, S>({
     namespace,
     before: subscribe.trigger,
     type: 'computation',
@@ -108,17 +108,17 @@ export const createStore = <S extends AnyObject>(
     argsGetter: (args) => [reactiveState, ...args],
   })
 
-  const compute = (memo, name) => actMemo(memo, (function_) => (...args) => computed(() => function_(...args)), name)
+  const compute = (memo, name) => actCompute(memo, (function_) => (...args) => computed(() => function_(...args)), name)
 
-  const computes = (memoTree) => executeRecodeFunctions(memoTree, compute)
+  const computes = (memoTree) => executeFunctions(memoTree, compute)
 
   const mutation = (mutation, name) => actMutation(mutation, undefined, name)
 
-  const mutations = (mutationTree) => executeRecodeFunctions(mutationTree, mutation)
+  const mutations = (mutationTree) => executeFunctions(mutationTree, mutation)
 
   const action = (action, name?) => actAction(action, undefined, name)
 
-  const actions = (actionTree) => executeRecodeFunctions(actionTree, action)
+  const actions = (actionTree) => executeFunctions(actionTree, action)
 
   const clear = (type: ClearNames): void => {
     switch (type) {

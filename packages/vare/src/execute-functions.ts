@@ -4,14 +4,14 @@ type ArgGetter = (target, key) => any[]
 
 const defaultGetter = (value, key) => [value, key]
 
-export const executeRecodeFunctions = <T>(
+export const executeFunctions = <T>(
   recode: T,
-  target: AnyFunction,
+  func: AnyFunction,
   argGetter: ArgGetter = defaultGetter,
 ): any => {
   return Object.keys(recode).reduce((result: Record<any, any>, key) => {
     const value = recode[key]
-    result[key] = target(...argGetter(value, key))
+    result[key] = func(...argGetter(value, key))
     return result
   }, {}) as any
 }
