@@ -27,11 +27,11 @@ describe('store actions', function test() {
       },
     })
 
-    expect(store.state.foo).to.equal('foo')
-    expect(store.state.bar).to.equal('bar')
+    expect(store.state.foo).toBe('foo')
+    expect(store.state.bar).toBe('bar')
     await getFoo('FOO')
-    expect(store.state.foo).to.equal('FOO')
+    expect(store.state.foo).toBe('FOO')
     await getBar('BAR')
-    expect(store.state.bar).to.equal('BAR')
+    expect(store.state.bar).toBe('BAR')
   })
 })

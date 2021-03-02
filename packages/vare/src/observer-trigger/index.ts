@@ -1,55 +1,44 @@
-import {AnyFunction} from '@/types'
-import {actor} from './actor'
+import {AnyFunction} from 'src/types'
+import {getUnknownName} from 'src/uid'
 
-let uid = 0
+export type AfterCallHook<Args extends any[], Data = any, Result = any> = (args: Args, result: Result, data?: Data) => any
+export type BeforeCallHook<Args extends any[], Data = any> = (args: Args, data?: Data) => any
 
-export interface TriggerOptions<N, S, T extends AnyFunction> {
-  before?: (type: N, name: string, args: any[], original: T, wrapper: T) => any
-  after?: (namespace: string, name: string, args: any[], state: S) => any
-  wrap?: ActionWrap<T>
-  state?: S
-  action: T,
+export interface CallHooksOptions<Args extends any[], Result = any> {
+  before?: BeforeCallHook<Args>
+  after?: AfterCallHook<Args, Result>
+}
+
+export interface ActOptions<
+  State,
+  Kind extends string,
+  Args extends any[],
+  Result = any,
+  > extends CallHooksOptions<Args, Result>{
   namespace?: string
-  name?: string
-  type: N
-  argsGetter?: (args: any[]) => any[]
+  kind: Kind
+  state: State
 }
 
-export type CreateTriggerOptions<N, S> = Omit<TriggerOptions<N, S, any>, 'action' | 'name'>
-
-export type ActionWrap<T extends AnyFunction> = (function_: T) => T
-
-export const hookedFunction = <N, S, T extends AnyFunction>(options: TriggerOptions<N, S, T>): T => {
-  const {
-    namespace = 'unknown',
-    name = 'unknown',
-    wrap,
-    action,
-    state = {} as S,
-    before,
-    after,
-    type,
-    argsGetter,
-  } = options
-
-  const wrapper = actor(action, {
-    before,
-    after,
-    wrap,
-    argsGetter,
-    beforeArgsGetter: (action: T, args: Parameters<T>) => [type, name, args, action, wrapper],
-    afterArgsGetter: (action: T, args: Parameters<T>) => [namespace, name, args, state],
-  })
-
-  return wrapper
+export const createCallHooks = (options: CallHooksOptions<any[]>) => <A extends any[], R, Data = any>(action: AnyFunction<A, R>, data?: Data): AnyFunction<A, R> => {
+  const {before, after} = options
+  return (...args: A): R => {
+    before?.(args, data)
+    const result = action(...args)
+    after?.(args, result, data)
+    return result
+  }
 }
 
-export const createHookedFunction = <N, S>(options: CreateTriggerOptions<N, S>) => {
-  return <T extends AnyFunction>(action: T, wrap?: ActionWrap<T>, name: string = String(uid += 1)): T =>
-    hookedFunction({
-      ...options,
-      wrap,
-      action,
-      name,
-    })
+export const act = (options: CallHooksOptions<any[], any>) => {
+  const callHooks = createCallHooks(options)
+
+  return (wrapper?: AnyFunction) =>
+    <AArgs extends any[]>(additionalArgs: AArgs) =>
+      <A extends any[], R>(action: AnyFunction<[...AArgs, ...A], R>, name: string = getUnknownName()):
+    AnyFunction<A, R> => {
+    const wrappedActon = wrapper ? wrapper(action) : action
+    const additionalArgsActon = (...args: A) => wrappedActon(...additionalArgs, ...args)
+    return callHooks<A, R, string>(additionalArgsActon, name)
+  }
 }

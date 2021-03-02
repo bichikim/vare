@@ -36,10 +36,6 @@
   "browserslist": [
     "last 2 version"
   ],
-  "optionalDependencies": {
-    "@vue/composition-api": "^1.0.0-rc.1",
-    "vue": "^3.0.0"
-  },
   "dependencies": {
     "vue-demi": "^0.6.0"
   },

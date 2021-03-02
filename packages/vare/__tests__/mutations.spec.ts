@@ -16,11 +16,11 @@ describe('store mutations', function test() {
       },
     })
 
-    expect(store.state.foo).to.equal('foo')
-    expect(store.state.bar).to.equal('bar')
+    expect(store.state.foo).toBe('foo')
+    expect(store.state.bar).toBe('bar')
     setFoo('FOO')
-    expect(store.state.foo).to.equal('FOO')
+    expect(store.state.foo).toBe('FOO')
     setBar('BAR')
-    expect(store.state.bar).to.equal('BAR')
+    expect(store.state.bar).toBe('BAR')
   })
 })

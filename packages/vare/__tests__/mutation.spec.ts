@@ -6,8 +6,8 @@ describe('store mutation', function test() {
       foo: 'foo',
     }, {name: 'foo'})
     const setFoo = store.mutation((state, name: string) => (state.foo = name))
-    expect(store.state.foo).to.equal('foo')
+    expect(store.state.foo).toBe('foo')
     setFoo('bar')
-    expect(store.state.foo).to.equal('bar')
+    expect(store.state.foo).toBe('bar')
   })
 })

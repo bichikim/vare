@@ -5,7 +5,8 @@
     "target": "es2015",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+      "src/*": ["src/*"]
     },
     "plugins": [{"transform": "@zerollup/ts-transform-paths"}]
   },
