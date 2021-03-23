@@ -1,6 +1,6 @@
 {
   "name": "vare",
-  "version": "0.2.0-alpha.2",
+  "version": "0.3.0-alpha.1",
   "private": false,
   "description": "share state for vue component ",
   "keywords": [
@@ -66,6 +66,7 @@
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.0",
     "eslint-plugin-vue": "^7.0.0-beta.1",
+    "flush-promises": "^1.0.2",
     "gulp": "^4.0.2",
     "gulp-execa": "^2.0.0",
     "mocha": "^8.1.1",
