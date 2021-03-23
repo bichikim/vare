@@ -1,145 +1,113 @@
-import {AnyFunction, AnyObject} from './types'
-import {withCombineProps} from './with-combine-props'
+import {AnyFunction} from '@/types'
+import {computed, nextTick, watch, WatchStopHandle} from 'vue-demi'
+import {Action, ACTION_IDENTIFIER, isAction} from './act'
+import {Computation, ComputationWritable} from './compute'
+import {isMutation, Mutation, MUTATION_IDENTIFIER} from './mutate'
+import {State} from './state'
 
-export interface LinkProps {
-  link?: Map<Subscribe<any, any>, true>
+export type SubscribeHook<Args extends any[]> = (...args: Args) => any
+
+export interface Subscribe<Callback extends AnyFunction, Type> {
+  subscribe(callback: Callback, type?: Type): void
+
+  unsubscribe(func: AnyFunction, type?: Type): void
+
+  clear(type?: Type): void
 }
 
-export interface SubscribeProps<F, P> {
-  nest?: Map<P, Map<F, true>>
-  type?: P
-  func?: F
-}
+export const SUBSCRIPTIONS = Symbol('hooks')
 
-const typedSubscribe = <F extends AnyFunction, P>(props: SubscribeProps<F, P>) => {
-  const {nest, type, func} = props
-  if (!nest || !type || !func) {
-    return
-  }
-  const subscribes = nest.get(type)
-  if (subscribes) {
-    subscribes.set(func, true)
-  }
-}
+export type SubscribeTarget = Mutation<any> | Action<any> | Computation<any, any> | ComputationWritable<any, any>
 
-const typedUnsubscribe = <F extends AnyFunction, P>(props: SubscribeProps<F, P>) => {
-  const {nest, type, func} = props
+export const setSubscribe = (target: SubscribeTarget, hook: SubscribeHook<any>) => {
+  const hooks = target[SUBSCRIPTIONS]
 
-  if (!nest || !type || !func) {
-    return
-  }
-
-  const subscribes = nest.get(type)
-  if (subscribes) {
-    subscribes.delete(func)
+  if (hooks) {
+    hooks.add(hook)
   }
 }
 
-export interface WithSubscribes<F extends AnyFunction | AnyObject> {
-  subscribes?: Map<F, true>
-  execute?: (target: F, ...args: any[]) => any
-  args?: any[]
-}
+export const deleteSubscribe = (target: SubscribeTarget, hook: SubscribeHook<any>) => {
+  const hooks = target[SUBSCRIPTIONS]
 
-export const withSubscribes = <F extends AnyFunction | AnyObject>(originalFunc: (props: WithSubscribes<F>) => any, subscribes: Map<F, true>) => {
-  return (props: WithSubscribes<F>): any => {
-    return originalFunc({...props, subscribes})
+  if (hooks) {
+    hooks.delete(hook)
   }
 }
 
-const defaultExecute = <F extends AnyFunction | AnyObject>(target: F, ...args: any[]) => {
-  if (typeof target !== 'object') {
-    return (target as AnyFunction)(...args)
-  }
-}
+export const fireSubscribe = (target: SubscribeTarget, ...args: any[]) => {
+  nextTick(() => {
+    const hooks = target[SUBSCRIPTIONS]
 
-export const callAllSubscribes = <F extends AnyFunction | AnyObject>(props: WithSubscribes<F>): void => {
-  const {subscribes = [], execute = defaultExecute, args = []} = props
-  subscribes.forEach((_, subscribe) => {
-    execute(subscribe, ...args)
+    if (hooks) {
+      hooks.forEach((hook) => {
+        hook(...args)
+      })
+    }
+  }).catch((error) => {
+    // subscribe development error handling
+    if (process.env.NODE_ENV === 'development') {
+      console.error(`subscribe error target: ${target.name} ${target}, error: ${error}`)
+    }
   })
 }
 
-export interface TypedTriggerProps<F extends AnyFunction, P> extends
-  SubscribeProps<F, P>,
-  Omit<WithSubscribes<F>, 'subscribes'>,
-  LinkProps
-{
-  args?: any[]
+export const watchHolder = new WeakMap<any, WatchStopHandle>()
+
+export const watchTarget = (target: any, hook: SubscribeHook<any>) => {
+  const stop = watch(computed(() => target), hook, {deep: true})
+  watchHolder.set(hook, stop)
 }
 
-export const typedTrigger = <F extends AnyFunction, P>(props: TypedTriggerProps<F, P>): void => {
-  const {args = [], nest, type, execute, link} = props
+export const stopWatchTarget = (hook: SubscribeHook<any>) => {
+  const stop = watchHolder.get(hook)
 
-  if (!nest || !type) {
+  if (stop) {
+    stop()
+  }
+}
+
+/**
+ * start the subscription
+ * @param mutation
+ * @param hook
+ */
+export function subscribe<Args extends any[]>(mutation: Mutation<Args>, hook: SubscribeHook<Args>): void
+export function subscribe<Args extends any[], Return = any>(action: Action<Args, Return>, hook: SubscribeHook<Args>): void
+export function subscribe<Args extends any[], Return = any>(computation: Computation<Args, Return>, hook: SubscribeHook<Args>): void
+export function subscribe<Args extends any[], Return = any>(computation: ComputationWritable<Args, Return>, hook: SubscribeHook<Args>): void
+export function subscribe<T>(state: State<T>, hook: SubscribeHook<[T]>): void
+export function subscribe(
+  target,
+  hook,
+) {
+  // when Mutation, Action or Computation
+  if (isMutation(target) || isAction(target)) {
+    setSubscribe(target, hook)
     return
   }
 
-  const subscribes = nest.get(type)
+  // state or any Ref
+  watchTarget(target, hook)
+}
 
-  if (!subscribes) {
+/**
+ * stop the subscription
+ * @param mutation
+ * @param hook
+ */
+export function unsubscribe<Args extends any[]>(mutation: Mutation<Args>, hook: SubscribeHook<Args>): void
+export function unsubscribe<Args extends any[], Return = any>(action: Action<Args, Return>, hook: SubscribeHook<Args>): void
+export function unsubscribe<Args extends any[], Return = any>(computation: Computation<Args, Return>, hook: SubscribeHook<Args>): void
+export function unsubscribe<Args extends any[], Return = any>(computation: ComputationWritable<Args, Return>, hook: SubscribeHook<Args>): void
+export function unsubscribe<T>(state: State<T>, hook: SubscribeHook<[T]>): void
+export function unsubscribe(target, hook) {
+  // when Mutation, Action or Computation
+  if (target[MUTATION_IDENTIFIER] || target[ACTION_IDENTIFIER]) {
+    deleteSubscribe(target, hook)
     return
   }
 
-  callAllSubscribes({subscribes, execute, args})
-
-  if (link) {
-    link.forEach((_, subscribe) => {
-      subscribe.trigger(type, ...args)
-    })
-  }
-}
-
-export const typedClear = <F extends AnyFunction, P>(nest: Map<P, Map<F, true>>) => (type: P): void => {
-  const subscribes = nest.get(type)
-  if (subscribes) {
-    subscribes.clear()
-  }
-}
-
-export interface Subscribe<F extends AnyFunction, P> {
-  subscribe(func: F, type?: P): void
-  unsubscribe(func: F, type?: P): void
-  link(subscribe: Subscribe<any, any>)
-  unlink(subscribe: Subscribe<any, any>)
-  trigger(type: P, ...args: any[]): void
-  clear(type: P): void
-}
-
-export interface AdditionalProps<F extends AnyFunction, P> {
-  nest: Map<P, Map<F, true>>
-  link: Map<Subscribe<any, any>, true>
-}
-
-export const createSubscribe = <F extends AnyFunction, P>(types: P[], defaultType: P): Subscribe<F, P> => {
-  const nest: Map<P, Map<F, true>> = new Map()
-
-  const link: Map<Subscribe<any, any>, true> = new Map()
-
-  types.forEach((type) => {
-    nest.set(type, new Map<F, true>())
-  })
-
-  const triggerFunc = withCombineProps(typedTrigger, {nest, link})
-
-  const subscribeFunc = withCombineProps(typedSubscribe, {nest})
-
-  const unsubscribeFunc = withCombineProps(typedUnsubscribe, {nest})
-
-  const trigger = (type: P, ...args: Parameters<F>) => triggerFunc({type, args})
-
-  const subscribe = (func: F, type: P = defaultType) => subscribeFunc({func, type})
-
-  const unsubscribe = (func: F, type: P = defaultType) => unsubscribeFunc({func, type})
-
-  const clear = typedClear<F, P>(nest)
-
-  return Object.freeze({
-    subscribe,
-    unsubscribe,
-    link: (subscribe) => (link.set(subscribe, true)),
-    unlink: (subscribe) => (link.delete(subscribe)),
-    trigger,
-    clear,
-  })
+  // state or any Ref
+  stopWatchTarget(hook)
 }

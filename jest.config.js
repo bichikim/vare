@@ -1,7 +1,4 @@
 module.exports = {
-
-  collectCoverage: true,
-
   maxWorkers: '70%',
 
   moduleFileExtensions: ['js', 'jsx', 'ts', 'tsx'],
@@ -17,5 +14,11 @@ module.exports = {
 
   projects: [
     '<rootDir>/packages/*/jest.config.js',
+  ],
+
+  testPathIgnorePatterns: [
+    '\\.snap$',
+    '/node_modules/',
+    '(/__tests__/.*|(\\.|/)(test|spec))\\.d.ts$',
   ],
 }
