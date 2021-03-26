@@ -1,6 +1,6 @@
 {
   "name": "vare",
-  "version": "0.3.0-alpha.1",
+  "version": "0.3.0-alpha.0",
   "private": false,
   "description": "share state for vue component ",
   "keywords": [
