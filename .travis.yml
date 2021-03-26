@@ -7,10 +7,3 @@ install:
   - pnpm install
 after_success:
   - codecov
-before_deploy:
-  - echo //registry.npmjs.org/:_authToken=\${YOUR_AUTH_TOKEN}" >> ./.npmrc
-deploy:
-  provider: script
-  script: "npm run leran publish from-git"
-  on:
-    tags: true
