@@ -4,8 +4,7 @@ Vue (Vue 3.x) Share State for a vue component
 
 This is a Prerelease version!
 
-This Vare works fine, however there are maybe some unknown bugs.
-(Unit tests have not been completed yet.)
+This Vare works well, but there may be some unknown bugs.
 
 ## What is this?
 
