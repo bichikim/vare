@@ -23,9 +23,9 @@
     "dev:example": "pnpm run dev --filter example... --parallel",
     "docs": "vuepress dev",
     "clean": "rimraf node_modules && lerna clean",
-    "deploy:alpha: ": "lerna publish prepatch --force-publish --preid=alpha",
-    "deploy:beta": "lerna publish --canary --preid=beta",
-    "deploy:next": "lerna publish --preid=next",
+    "deploy:alpha: ": "lerna publish prepatch --force-publish --dist-tag --preid=alpha",
+    "deploy:beta": "lerna publish --dist-tag --preid=beta",
+    "deploy:next": "lerna publish --dist-tag --preid=next",
     "format:package.json": "sort-package-json \"package.json\" \"packages/*/package.json\" ",
     "test": "jest"
   },
