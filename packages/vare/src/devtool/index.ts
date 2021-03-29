@@ -16,10 +16,6 @@ export const drop = (array: any[]) => {
 }
 
 export const startDevtool = (app: App, states: Record<string, State<any>>) => {
-  if (process.env.NODE_ENV !== 'development') {
-    return
-  }
-
   if (isSSR()) {
     return
   }

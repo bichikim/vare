@@ -14,8 +14,11 @@ export const bar = state({
   deep: {
     bar: 'bar',
   },
+  foo,
 })
 
 export default boot(({app}) => {
-  startDevtool(app, {foo, bar})
+  if (process.env.NODE_ENV !== 'development') {
+    startDevtool(app, {foo, bar})
+  }
 })
