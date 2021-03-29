@@ -18,7 +18,7 @@ export const bar = state({
 })
 
 export default boot(({app}) => {
-  if (process.env.NODE_ENV !== 'development') {
+  if (process.env.NODE_ENV === 'development') {
     startDevtool(app, {foo, bar})
   }
 })

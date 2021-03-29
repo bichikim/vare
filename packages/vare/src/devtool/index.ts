@@ -21,7 +21,9 @@ export const startDevtool = (app: App, states: Record<string, State<any>>) => {
   }
 
   let _api: DevtoolsPluginApi
-  const inspectorId = 'vare-state-tree'
+  const inspectorId = 'vare-structure'
+  const actionTimelineId = 'vare-action'
+  const mutationTimeLineId = 'var-mutation'
   const getStates = createGetStates(states)
 
   setupDevtoolsPlugin({
@@ -31,12 +33,25 @@ export const startDevtool = (app: App, states: Record<string, State<any>>) => {
     packageName: 'vare',
   }, (api) => {
     _api = api
+
     api.addInspector({
       id: inspectorId,
-      label: 'vare tree inspector',
+      label: 'Vare Structure',
       icon: 'mediation',
       treeFilterPlaceholder: 'Search for Vare',
       stateFilterPlaceholder: 'Search for state',
+    })
+
+    api.addTimelineLayer({
+      id: actionTimelineId,
+      label: 'Vare Actions',
+      color: 0xf08d49,
+    })
+
+    api.addTimelineLayer({
+      id: mutationTimeLineId,
+      label: 'Vare Mutation',
+      color: 0x3eaf7c,
     })
 
     api.on.getInspectorTree((payload) => {
