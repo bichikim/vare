@@ -59,6 +59,7 @@ importers:
     dependencies:
       '@quasar/extras': 1.10.0
       '@vue/compiler-dom': 3.0.9
+      '@vue/devtools-api': 6.0.0-beta.7
       '@vue/runtime-core': 3.0.9
       '@vue/runtime-dom': 3.0.9
       core-js: 3.9.1
@@ -93,6 +94,7 @@ importers:
       '@typescript-eslint/parser': ^4.9.0
       '@vue/compiler-dom': ^3.0.9
       '@vue/compiler-sfc': ^3.0.7
+      '@vue/devtools-api': ^6.0.0-beta.7
       '@vue/eslint-config-standard': ^6.0.0
       '@vue/eslint-config-typescript': ^7.0.0
       '@vue/runtime-core': ^3.0.9
@@ -113,6 +115,7 @@ importers:
       workbox-webpack-plugin: ^5.0.0
   packages/vare:
     dependencies:
+      '@vue/devtools-api': 6.0.0-beta.7
       vue-demi: 0.7.4_vue@3.0.6
     devDependencies:
       '@babel/core': 7.13.8
@@ -170,6 +173,7 @@ importers:
       '@typescript-eslint/eslint-plugin': ^3.8.0
       '@typescript-eslint/parser': ^3.8.0
       '@vue/babel-preset-app': ^4.5.0
+      '@vue/devtools-api': ^6.0.0-beta.7
       '@vue/eslint-config-standard': ^5.1.2
       '@vue/eslint-config-typescript': ^5.0.2
       '@vue/test-utils': ^2.0.0-beta.2

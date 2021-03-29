@@ -37,7 +37,8 @@
     "last 2 version"
   ],
   "dependencies": {
-    "vue-demi": "^0.7.4"
+    "vue-demi": "^0.7.4",
+    "@vue/devtools-api": "^6.0.0-beta.7"
   },
   "devDependencies": {
     "@babel/core": "^7.11.1",

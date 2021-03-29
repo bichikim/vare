@@ -44,7 +44,6 @@ module.exports = {
         requireLast: true,
       },
       singleline: {
-        delimiter: 'none',
         requireLast: false,
       },
     }],
