@@ -6,8 +6,8 @@
   "author": "Bichi Kim <bichi@live.co.kr>",
   "private": true,
   "scripts": {
-    "dev:pwa": "quasar dev -m pwa",
-    "dev": "quasar dev -m bex",
+    "dev": "quasar dev -m pwa",
+    "dev:bex": "quasar dev -m bex",
     "dev:android": "quasar dev -m capacitor -T android",
     "clean": "rimraf node_modules",
     "build": "quasar build",

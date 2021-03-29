@@ -17,4 +17,4 @@ export {subscribe, setSubscribe, fireSubscribe, stopWatchTarget, watchTarget, SU
 export type {Subscribe, SubscribeHook, SubscribeTarget} from './subscribe'
 export {act, ACTION_IDENTIFIER, isAction} from './act'
 export type {Action, ActionRecipe} from './act'
-
+export {startDevtool} from './devtool'
