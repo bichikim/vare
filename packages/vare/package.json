@@ -1,6 +1,6 @@
 {
   "name": "vare",
-  "version": "1.0.0-beta.0",
+  "version": "1.0.0-beta.1",
   "private": false,
   "description": "share state for vue component ",
   "keywords": [
@@ -37,8 +37,8 @@
     "last 2 version"
   ],
   "dependencies": {
-    "vue-demi": "^0.7.4",
-    "@vue/devtools-api": "^6.0.0-beta.7"
+    "@vue/devtools-api": "^6.0.0-beta.7",
+    "vue-demi": "^0.7.4"
   },
   "devDependencies": {
     "@babel/core": "^7.11.1",

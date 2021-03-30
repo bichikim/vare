@@ -81,6 +81,66 @@ const createVareDevTool = (): Plugin => {
               }
             })
 
+            api.on.getInspectorState(payload => {
+              if (payload.app === app && payload.inspectorId === 'test-inspector') {
+                if (payload.nodeId === 'root') {
+                  payload.state = {
+                    'root info': [
+                      {
+                        key: 'foo',
+                        value: 'foo',
+                        editable: true,
+                      },
+                      {
+                        key: 'time',
+                        value: 0,
+                        editable: false,
+                      },
+                      {
+                        key: 'bar',
+                        value: {
+                          _custom: {
+                            display: '42!!!',
+                            value: 42,
+                            tooltip: 'The answer',
+                          },
+                        },
+                        editable: false,
+                      },
+                      {
+                        editable: false,
+                        value: {
+                          foo: {
+                            _custom: {
+                              value: 42,
+                              tooltip: 'The answer',
+                            },
+                          },
+                        },
+                        key: 'omg',
+                      },
+                    ],
+                  }
+                } else {
+                  payload.state = {
+                    'child info': [
+                      {
+                        key: 'answer',
+                        editable: false,
+                        value: {
+                          _custom: {
+                            display: '42!!!',
+                            value: 42,
+                            tooltip: 'The answer',
+                          },
+                        },
+                      },
+                    ],
+                  }
+                }
+              }
+            })
+
             setInterval(() => {
               api.sendInspectorState('test-inspector')
             }, 5000)
