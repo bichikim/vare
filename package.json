@@ -23,9 +23,7 @@
     "dev:dev-tool": "pnpm run dev --filter vare-dev-tool --parallel",
     "docs": "vuepress dev",
     "clean": "rimraf node_modules && lerna clean",
-    "deploy:alpha: ": "lerna publish prepatch --force-publish --dist-tag --preid=alpha",
-    "deploy:beta": "lerna publish --dist-tag --preid=beta",
-    "deploy:next": "lerna publish --dist-tag --preid=next",
+    "deploy": "pnpm run deploy --filter vare",
     "format:package.json": "sort-package-json \"package.json\" \"packages/*/package.json\" ",
     "test": "jest"
   },
