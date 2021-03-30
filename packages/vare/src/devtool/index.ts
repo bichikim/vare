@@ -74,9 +74,10 @@ export const startDevtool = (app: App, states: Record<string, State<any>>) => {
           key: payload.nodeId,
           ...states[payload.nodeId],
         }],
-        computation: [],
-        mutation: [],
-        action: [],
+        // WIP
+        // computation: [],
+        // mutation: [],
+        // action: [],
       }
     })
 

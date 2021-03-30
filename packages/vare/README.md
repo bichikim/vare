@@ -383,4 +383,10 @@ const FooComponent = defineComponent(() => {
 
 ## Supporting Vue DevTool ?
 
-Nope! (WIP)
+Yes! 
+
+- state (DONE) \
+![state-devtool](./media/state-devtool.png)
+- computation (WIP)
+- mutation (WIP)
+- action (WIP)
