@@ -38,7 +38,15 @@ module.exports = {
       allowTernary: true,
       allowShortCircuit: true,
     }],
-    '@typescript-eslint/member-delimiter-style': 'off',
+    '@typescript-eslint/member-delimiter-style': ['error', {
+      multiline: {
+        delimiter: 'none',
+        requireLast: true,
+      },
+      singleline: {
+        requireLast: false,
+      },
+    }],
   },
   overrides: [
     {

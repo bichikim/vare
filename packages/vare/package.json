@@ -1,6 +1,6 @@
 {
   "name": "vare",
-  "version": "0.3.0-alpha.1",
+  "version": "1.0.0-beta.1",
   "private": false,
   "description": "share state for vue component ",
   "keywords": [
@@ -28,7 +28,7 @@
   ],
   "scripts": {
     "build": "rollup -c",
-    "deploy": "yarn build && npm publish",
+    "deploy": "npm run build && npm publish",
     "dev": "rollup -c --watch",
     "docs": "vuepress dev",
     "docs:build": "vuepress build"
@@ -37,7 +37,8 @@
     "last 2 version"
   ],
   "dependencies": {
-    "vue-demi": "^0.6.0"
+    "@vue/devtools-api": "^6.0.0-beta.7",
+    "vue-demi": "^0.7.4"
   },
   "devDependencies": {
     "@babel/core": "^7.11.1",
