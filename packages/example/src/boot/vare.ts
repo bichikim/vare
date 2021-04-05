@@ -1,5 +1,5 @@
 import {boot} from 'quasar/wrappers'
-import {startDevtool, state} from 'vare'
+import {startDevtool, state, mutate} from 'vare'
 
 export const foo = state({
   name: 'foo',
@@ -9,6 +9,10 @@ export const foo = state({
   array: ['foo'],
 })
 
+export const setDeepBar = mutate(foo, (state, value: string) => {
+  state.deep.bar = value
+}, 'setDeepBar')
+
 export const bar = state({
   name: 'bar',
   deep: {
@@ -16,6 +20,11 @@ export const bar = state({
   },
   foo,
 })
+
+export const setNames = mutate([foo, bar], ([foo, bar], value: string) => {
+  foo.name = value
+  bar.name = value
+}, 'setNames')
 
 export default boot(({app}) => {
   if (process.env.NODE_ENV === 'development') {

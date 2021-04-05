@@ -4,16 +4,11 @@ import {App} from 'vue'
 import {createGetStates} from './get-states'
 import {genInspectorTree} from './gen-inspector-tree'
 import {isSSR} from '@/is-ssr'
+import {drop} from '@/utils'
 
 export type GetStates = () => Record<string, Omit<StateBase, 'key'>>
 
 export const DEVTOOL_ID = 'com.npmjs.packages.vare'
-
-export const drop = (array: any[]) => {
-  const value = [...array]
-  value.shift()
-  return value
-}
 
 export const startDevtool = (app: App, states: Record<string, State<any>>) => {
   if (isSSR()) {
