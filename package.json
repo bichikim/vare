@@ -21,7 +21,7 @@
   "scripts": {
     "build": "pnpm run build --filter vare",
     "dev": "pnpm run dev --filter example... --parallel",
-    "dev:dev-tool": "pnpm run dev --filter vare-dev-tool --parallel",
+    "dev:example": "pnpm run dev --filter vare-dev-tool --parallel",
     "docs": "vuepress dev",
     "clean": "rimraf node_modules && lerna clean",
     "deploy": "pnpm run deploy --filter vare",
