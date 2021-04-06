@@ -4,7 +4,7 @@ import {App} from 'vue'
 import {createGetStates} from './get-states'
 import {genInspectorTree} from './gen-inspector-tree'
 import {isSSR} from '@/is-ssr'
-import {drop} from '@/utils'
+import {AllKinds, drop, getType, getName, getDescription} from '@/utils'
 
 export type GetStates = () => Record<string, Omit<StateBase, 'key'>>
 
@@ -19,6 +19,7 @@ export const startDevtool = (app: App, states: Record<string, State<any>>) => {
   const inspectorId = 'vare-structure'
   const actionTimelineId = 'vare-action'
   const mutationTimeLineId = 'var-mutation'
+  let relationMap: Map<string, AllKinds> = new Map<string, AllKinds>()
   const getStates = createGetStates(states)
 
   setupDevtoolsPlugin({
@@ -54,7 +55,10 @@ export const startDevtool = (app: App, states: Record<string, State<any>>) => {
         return
       }
 
-      payload.rootNodes = genInspectorTree(states)
+      const {nodes, relationMap: _relationMap} = genInspectorTree(states)
+      relationMap = _relationMap
+
+      payload.rootNodes = nodes
     })
 
     api.on.getInspectorState((payload) => {
@@ -64,15 +68,48 @@ export const startDevtool = (app: App, states: Record<string, State<any>>) => {
 
       const states = getStates()
 
+      const state = states[payload.nodeId]
+
+      if (state) {
+        payload.state = {
+          state: [{
+            key: payload.nodeId,
+            ...state,
+          }],
+        }
+        return
+      }
+
+      const member = relationMap.get(payload.nodeId)
+
+      const type = getType(member) ?? 'unknown'
+
+      const raw = member?.toString() ?? 'empty'
+
+      const description = getDescription(member)
+
       payload.state = {
-        state: [{
-          key: payload.nodeId,
-          ...states[payload.nodeId],
+        [type]: [{
+          key: getName(member),
+          value: {
+            _custom: {
+              display: description ?? 'none',
+              type: 'function',
+              tooltip: raw,
+            },
+          },
+          editable: false,
+          raw,
         }],
-        // WIP
-        // computation: [],
-        // mutation: [],
-        // action: [],
+        relate: [{
+          key: 'foo',
+          editable: false,
+          value: {
+            _custom: {
+              display: 'state',
+            },
+          },
+        }],
       }
     })
 

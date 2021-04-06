@@ -1,29 +1,38 @@
 import {fireSubscribe, SUBSCRIPTIONS, SubscribeHook} from './subscribe'
-import {AnyFunction} from './types'
+import {createUuid, getType, beVareMember, VareMember} from '@/utils'
+
+const actionUuid = createUuid('unknown')
 
 export type ActionRecipe<Args extends any[], Return> = (...args: Args) => Return | Promise<Return>
 
-export const ACTION_IDENTIFIER = Symbol('act')
+export type ActionIdentifierName = 'action'
 
-export type Action<Args extends any[], Return = any> = (...args: Args) => Return & {
-  [ACTION_IDENTIFIER]: boolean
+export const actionName: ActionIdentifierName = 'action'
+
+export interface ActionMember<Args extends any[]> extends VareMember {
   [SUBSCRIPTIONS]: Set<SubscribeHook<Args>>
 }
 
-export const isAction = (item?: AnyFunction): item is Action<any> => {
-  return Boolean(item?.[ACTION_IDENTIFIER])
+export type Action<Args extends any[], Return = any> = ((...args: Args) => Return | Promise<Return>) & ActionMember<Args>
+
+export const isAction = (value?: any): value is Action<any> => {
+  return getType(value) === actionName
 }
 
 export const act = <Args extends any[], Return>(
   recipe: ActionRecipe<Args, Return>,
+  name?: string,
 ): Action<Args> => {
-  const self = (...args: Args): Return | Promise<Return> => {
+  const self: any = (...args: Args): Return | Promise<Return> => {
     fireSubscribe(self, ...args)
     return recipe(...args)
   }
 
-  return Object.assign(self, {
-    [ACTION_IDENTIFIER]: true,
+  const _name = name ?? actionUuid()
+
+  const member = beVareMember<Action<Args>>(self, actionName, _name)
+
+  return Object.assign(member, {
     [SUBSCRIPTIONS]: new Set(),
   })
 }

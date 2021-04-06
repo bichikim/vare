@@ -1,36 +1,53 @@
-import {relateState, State, NAME} from './state'
+import {relateState, State} from './state'
 import {fireSubscribe, SubscribeHook, SUBSCRIPTIONS} from './subscribe'
-import {AnyFunction} from './types'
-import {createUuid} from './utils'
+import {createUuid, VareMember, getType, beVareMember} from './utils'
 
-const mutationUuid = createUuid()
+const mutationUuid = createUuid('unknown')
 
 export type MutationRecipe<Args extends any[], Return> = (...args: Args) => Return
 export type RelatedMutationRecipe<State, Args extends any[], Return> = (state: State, ...args: Args) => Return
 
-export const MUTATION_IDENTIFIER = Symbol('mutate')
+export type MutationIdentifierName = 'mutation'
 
-export interface MutationMember<Args extends any[]> {
-  /**
-   * Identifier
-   */
-  [MUTATION_IDENTIFIER]: boolean
-
+export interface MutationMember<Args extends any[]> extends VareMember {
   /**
    * subscriptions
    */
   [SUBSCRIPTIONS]: Set<SubscribeHook<Args>>
-
-  [NAME]: string
 }
+
+export const mutationName: MutationIdentifierName = 'mutation'
 
 /**
  * the mutation return type
  */
-export type Mutation<Args extends any[], Return = any> = (...args: Args) => Return & MutationMember<Args>
+export type Mutation<Args extends any[], Return = any> = ((...args: Args) => Return) & MutationMember<Args>
 
-export const isMutation = (item?: AnyFunction): item is Mutation<any[]> => {
-  return Boolean(item?.[MUTATION_IDENTIFIER])
+export const isMutation = (value?: any): value is Mutation<any[]> => {
+  return getType(value) === mutationName
+}
+
+const getMutatePrams = (unknown?, mayRecipe?: any, name?: string) => {
+  let recipe
+  let state
+  let _name
+  if (typeof mayRecipe === 'function') {
+    state = unknown
+    recipe = mayRecipe
+    _name = name
+  } else {
+    recipe = unknown
+    _name = name
+  }
+
+  if (!_name) {
+    _name = mutationUuid()
+  }
+  return {
+    name: _name,
+    recipe,
+    state,
+  }
 }
 
 /**
@@ -46,38 +63,23 @@ export function mutate<Args extends any[], Return = any>(
   name?: string
 ): Mutation<Args>
 export function mutate(unknown, mayRecipe?: any, name?: string): Mutation<any> {
-  let recipe
-  let state
-  let _name
-  if (typeof mayRecipe === 'function') {
-    state = unknown
-    recipe = mayRecipe
-    _name = name
-  } else {
-    recipe = unknown
-    _name = name
-  }
-
-  if (!_name) {
-    _name = `unknown-${mutationUuid()}`
-  }
+  const {state, recipe, name: _name} = getMutatePrams(unknown, mayRecipe, name)
 
   // create executor
-  const self = (...args: any[]): any => {
-    fireSubscribe(self, ...args)
-    if (state) {
-      return recipe(state, ...args)
-    }
-    return recipe(...args)
+  const self: any = (...args: any[]): any => {
+    const newArgs = state ? [state, ...args] : args
+
+    fireSubscribe(self, ...newArgs)
+    return recipe(...newArgs)
   }
+
+  const member = beVareMember<Mutation<any>>(self, mutationName, _name)
 
   /**
    * Add additional values
    */
-  const result = Object.assign(self, {
-    [MUTATION_IDENTIFIER]: true,
+  const result = Object.assign(member, {
     [SUBSCRIPTIONS]: new Set(),
-    [NAME]: _name,
   })
 
   // register mutation to state

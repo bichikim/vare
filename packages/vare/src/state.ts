@@ -1,40 +1,33 @@
 import {AnyObject, UnwrapNestedRefs} from '@/types'
 import {reactive} from 'vue-demi'
-import {Mutation} from './mutate'
+import {VareMember, getType, beVareMember, AllKinds, createUuid} from '@/utils'
+
+const stateUuid = createUuid('unknown')
 
 export const STATE_RELATES = Symbol('state-relate')
 
-export interface RelateAble {
-  [STATE_RELATES]: Set<State<any>>
-}
+export type StateIdentifierName = 'state'
 
-export const STATE_IDENTIFIER = Symbol('state-identifier')
+export const stateType: StateIdentifierName = 'state'
 
-export const NAME = Symbol('name')
-
-export type AllAbleRelates = Mutation<any>
-
-export interface StateMembers {
-  [STATE_IDENTIFIER]: boolean
-  [STATE_RELATES]: Set<AllAbleRelates>
-}
+export type StateMembers = VareMember
 
 export type State<State> = UnwrapNestedRefs<State> & StateMembers
 
-export const getStateRelates = (state: State<any>): Set<AllAbleRelates> => {
+export const getStateRelates = (state: State<any>): Set<AllKinds> => {
   return state[STATE_RELATES]
 }
 
 export const isState = (value: any): value is State<any> => {
-  return Boolean(value?.[STATE_IDENTIFIER])
+  return getType(value) === stateType
 }
 
-export const relateState = (state: State<any>, target) => {
+export const relateState = (state: State<any> | State<any>[] | Record<string, State<any>>, target: AllKinds) => {
   if (isState(state)) {
     state[STATE_RELATES].add(target)
   }
   if (Array.isArray(state)) {
-    state.forEach((item) => {
+    (state as State<any>[]).forEach((item) => {
       if (isState(item)) {
         item[STATE_RELATES].add(target)
       }
@@ -42,7 +35,7 @@ export const relateState = (state: State<any>, target) => {
   }
   if (typeof state === 'object') {
     Object.keys(state).forEach((key) => {
-      const item = state[key]
+      const item: State<any> = state[key]
       if (isState(item)) {
         item[STATE_RELATES].add(target)
       }
@@ -53,9 +46,10 @@ export const relateState = (state: State<any>, target) => {
 /**
  * state is the vue reactive
  */
-export const state = <S extends AnyObject>(initState: S): State<S> => {
-  return Object.assign(reactive<S>(initState), {
-    [STATE_IDENTIFIER]: true,
-    [STATE_RELATES]: new Set<AllAbleRelates>(),
-  })
+export const state = <S extends AnyObject>(initState: S, name?: string): State<S> => {
+  const _name = name ?? stateUuid()
+
+  return reactive<S>(initState) as any
+
+  // return beVareMember<State<S>>(reactive<S>(initState), stateType, _name)
 }

@@ -1,9 +1,10 @@
 import {AnyFunction} from '@/types'
 import {computed, nextTick, watch, WatchStopHandle} from 'vue-demi'
-import {Action, ACTION_IDENTIFIER, isAction} from './act'
+import {Action} from './act'
 import {Computation, ComputationWritable} from './compute'
-import {isMutation, Mutation, MUTATION_IDENTIFIER} from './mutate'
+import {Mutation} from './mutate'
 import {State} from './state'
+import {VareMember, getName, getType} from '@/utils'
 
 export type SubscribeHook<Args extends any[]> = (...args: Args) => any
 
@@ -16,6 +17,10 @@ export interface Subscribe<Callback extends AnyFunction, Type> {
 }
 
 export const SUBSCRIPTIONS = Symbol('hooks')
+
+export interface SubscribeMember extends VareMember {
+  [SUBSCRIPTIONS]: Set<SubscribeHook<any>>
+}
 
 export type SubscribeTarget = Mutation<any> | Action<any> | Computation<any, any> | ComputationWritable<any, any>
 
@@ -35,7 +40,7 @@ export const deleteSubscribe = (target: SubscribeTarget, hook: SubscribeHook<any
   }
 }
 
-export const fireSubscribe = (target: SubscribeTarget, ...args: any[]) => {
+export const fireSubscribe = (target: SubscribeMember, ...args: any[]) => {
   nextTick(() => {
     const hooks = target[SUBSCRIPTIONS]
 
@@ -47,7 +52,7 @@ export const fireSubscribe = (target: SubscribeTarget, ...args: any[]) => {
   }).catch((error) => {
     // subscribe development error handling
     if (process.env.NODE_ENV === 'development') {
-      console.error(`subscribe error target: ${target.name} ${target}, error: ${error}`)
+      console.error(`subscribe error target: ${getName(target)} ${target}, error: ${error}`)
     }
   })
 }
@@ -81,8 +86,9 @@ export function subscribe(
   target,
   hook,
 ) {
+  const type = getType(target)
   // when Mutation, Action or Computation
-  if (isMutation(target) || isAction(target)) {
+  if (type === 'mutation' || type === 'action') {
     setSubscribe(target, hook)
     return
   }
@@ -102,8 +108,9 @@ export function unsubscribe<Args extends any[], Return = any>(computation: Compu
 export function unsubscribe<Args extends any[], Return = any>(computation: ComputationWritable<Args, Return>, hook: SubscribeHook<Args>): void
 export function unsubscribe<T>(state: State<T>, hook: SubscribeHook<[T]>): void
 export function unsubscribe(target, hook) {
+  const type = getType(target)
   // when Mutation, Action or Computation
-  if (target[MUTATION_IDENTIFIER] || target[ACTION_IDENTIFIER]) {
+  if (type === 'mutation' || type === 'action') {
     deleteSubscribe(target, hook)
     return
   }

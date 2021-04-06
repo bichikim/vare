@@ -6,9 +6,6 @@
       :todos="todos"
       :meta="meta"
     ></example-component>
-    <div>{{ fooName }}</div>
-    <div>{{ fooArrayOne }}</div>
-    <div>{{ fooDeepBar }}</div>
   </q-page>
 </template>
 
@@ -16,15 +13,15 @@
 import {Todo, Meta} from 'components/models'
 import ExampleComponent from 'components/CompositionComponent.vue'
 import {defineComponent, ref, computed} from 'vue'
-import {foo} from 'src/boot/vare'
+// import {foo} from 'src/boot/vare'
 
 export default defineComponent({
   name: 'PageIndex',
   components: {ExampleComponent},
   setup() {
-    const fooName = computed(() => foo.name)
-    const fooArrayOne = computed(() => foo.array[0])
-    const fooDeepBar = computed(() => foo.deep.bar)
+    // const fooName = computed(() => foo.name)
+    // const fooArrayOne = computed(() => foo.array[0])
+    // const fooDeepBar = computed(() => foo.deep.bar)
     const todos = ref<Todo[]>([
       {
         id: 1,
@@ -50,7 +47,7 @@ export default defineComponent({
     const meta = ref<Meta>({
       totalCount: 1200,
     })
-    return {todos, meta, fooName, fooArrayOne, fooDeepBar}
+    return {todos, meta}
   },
 })
 </script>
