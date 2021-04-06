@@ -21,22 +21,29 @@ export const isState = (value: any): value is State<any> => {
   return getType(value) === stateType
 }
 
+export const relate = (state: State<any>, target: AllKinds) => {
+  state[STATE_RELATES].add(target)
+  target[STATE_RELATES].add(state)
+}
+
 export const relateState = (state: State<any> | State<any>[] | Record<string, State<any>>, target: AllKinds) => {
   if (isState(state)) {
-    state[STATE_RELATES].add(target)
+    relate(state, target)
+    return
   }
   if (Array.isArray(state)) {
     (state as State<any>[]).forEach((item) => {
       if (isState(item)) {
-        item[STATE_RELATES].add(target)
+        relate(item, target)
       }
     })
+    return
   }
   if (typeof state === 'object') {
     Object.keys(state).forEach((key) => {
       const item: State<any> = state[key]
       if (isState(item)) {
-        item[STATE_RELATES].add(target)
+        relate(item, target)
       }
     })
   }

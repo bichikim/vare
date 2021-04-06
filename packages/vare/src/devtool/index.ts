@@ -101,12 +101,13 @@ export const startDevtool = (app: App, states: Record<string, State<any>>) => {
           editable: false,
           raw,
         }],
+        // WIP
         relate: [{
           key: 'foo',
           editable: false,
           value: {
             _custom: {
-              display: 'state',
+              display: 'state WIP',
             },
           },
         }],
