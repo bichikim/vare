@@ -1,7 +1,8 @@
-import {State, STATE_RELATES, StateIdentifierName} from '@/state'
+import {State, StateIdentifierName} from '@/state'
 import {Mutation, MutationIdentifierName} from '@/mutate'
 import {Computation, ComputationIdentifierName} from '@/compute'
 import {Action, ActionIdentifierName} from '@/act'
+import {STATE_RELATES, IDENTIFIER, NAME} from './symbol'
 
 export type AllKinds = State<any> | Mutation<any> | Computation<any, any> | Action<any>
 
@@ -9,9 +10,6 @@ export type Identifier = MutationIdentifierName
   | StateIdentifierName
   | ComputationIdentifierName
   | ActionIdentifierName
-
-export const IDENTIFIER = Symbol('vare-identifier')
-export const NAME = Symbol('name')
 
 export interface VareMember {
   [IDENTIFIER]: Identifier

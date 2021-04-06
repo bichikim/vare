@@ -1,6 +1,7 @@
 import {relateState, State} from './state'
-import {fireSubscribe, SubscribeHook, SUBSCRIPTIONS} from './subscribe'
+import {fireSubscribe, SubscribeHook} from './subscribe'
 import {createUuid, VareMember, getType, beVareMember} from './utils'
+import {SUBSCRIPTIONS} from './symbol'
 
 const mutationUuid = createUuid('unknown')
 

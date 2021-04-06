@@ -5,6 +5,7 @@ import {Computation, ComputationWritable} from './compute'
 import {Mutation} from './mutate'
 import {State} from './state'
 import {VareMember, getName, getType} from '@/utils'
+import {SUBSCRIPTIONS} from './symbol'
 
 export type SubscribeHook<Args extends any[]> = (...args: Args) => any
 
@@ -15,8 +16,6 @@ export interface Subscribe<Callback extends AnyFunction, Type> {
 
   clear(type?: Type): void
 }
-
-export const SUBSCRIPTIONS = Symbol('hooks')
 
 export interface SubscribeMember extends VareMember {
   [SUBSCRIPTIONS]: Set<SubscribeHook<any>>

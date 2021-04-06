@@ -15,14 +15,14 @@ export default {
       file: 'dist/index.js',
       format: 'cjs',
       globals,
-      compact: true,
+      compact: false,
       sourcemap: true,
       name,
     },
     {
       file: 'dist/index.module.js',
       format: 'es',
-      compact: true,
+      compact: false,
       sourcemap: true,
       globals,
       name,
@@ -30,7 +30,7 @@ export default {
     {
       file: 'dist/index.global.js',
       format: 'iife',
-      compact: true,
+      compact: false,
       sourcemap: true,
       globals,
       name,
@@ -47,6 +47,6 @@ export default {
         },
       },
     }),
-    terser(),
+    // terser(),
   ],
 }

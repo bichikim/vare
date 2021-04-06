@@ -1,5 +1,6 @@
-import {fireSubscribe, SUBSCRIPTIONS, SubscribeHook} from './subscribe'
+import {fireSubscribe, SubscribeHook} from './subscribe'
 import {createUuid, getType, beVareMember, VareMember} from '@/utils'
+import {SUBSCRIPTIONS} from './symbol'
 
 const actionUuid = createUuid('unknown')
 

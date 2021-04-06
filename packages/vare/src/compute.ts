@@ -2,6 +2,7 @@ import {ComputedRef, WritableComputedRef} from '@vue/reactivity'
 import {computed} from 'vue-demi'
 import {getType, VareMember, beVareMember, createUuid} from './utils'
 import {relateState} from '@/state'
+import {COMPUTATION_TYPE} from './symbol'
 
 const computationUuid = createUuid('unknown')
 
@@ -24,8 +25,6 @@ export interface ComputationRecipeOptionsWithState<S, Args extends any[], Return
 export type ComputationIdentifierName = 'computation'
 
 export const computationName: ComputationIdentifierName = 'computation'
-
-export const COMPUTATION_TYPE = Symbol('computation-type')
 
 export type ComputationType = 'getter' | 'getter & setter'
 

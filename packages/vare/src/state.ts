@@ -1,10 +1,9 @@
 import {AnyObject, UnwrapNestedRefs} from '@/types'
 import {reactive} from 'vue-demi'
-import {VareMember, getType, beVareMember, AllKinds, createUuid} from '@/utils'
+import {VareMember, getType, beVareMember, AllKinds, createUuid} from './utils'
+import {STATE_RELATES} from './symbol'
 
-const stateUuid = createUuid('unknown')
-
-export const STATE_RELATES = Symbol('state-relate')
+export const stateUuid = createUuid('unknown')
 
 export type StateIdentifierName = 'state'
 
@@ -49,7 +48,5 @@ export const relateState = (state: State<any> | State<any>[] | Record<string, St
 export const state = <S extends AnyObject>(initState: S, name?: string): State<S> => {
   const _name = name ?? stateUuid()
 
-  return reactive<S>(initState) as any
-
-  // return beVareMember<State<S>>(reactive<S>(initState), stateType, _name)
+  return beVareMember<State<S>>(reactive<S>(initState), stateType, _name)
 }
