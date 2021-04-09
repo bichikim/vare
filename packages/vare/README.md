@@ -192,18 +192,19 @@ const hook = () => {
   // any
 }
 
-subscribe(myState, hook)
+const stopMyState = subscribe(myState, hook)
 
-subscribe(setName, hook)
+const stopSetName = subscribe(setName, hook)
 
-subscribe(requestName, hook)
+const stopRequestName = subscribe(requestName, hook)
 
-subscribe(getDecoName, hook)
+const stopGetDecoName = subscribe(getDecoName, hook)
 
-unsubscribe(myState, hook)
-unsubscribe(setName, hook)
-unsubscribe(requestName, hook)
-unsubscribe(getDecoName, hook)
+// unsubscribe
+stopMyState()
+stopSetName()
+stopRequestName()
+stopGetDecoName()
 
 ```
 
@@ -386,7 +387,7 @@ const FooComponent = defineComponent(() => {
 Yes! 
 
 - state (DONE) \
-![state-devtool](./media/state-devtool.png)
+![state-devtool](media/state-devtool.png)
 - computation (WIP)
 - mutation (WIP)
 - action (WIP)

@@ -3,8 +3,7 @@ import {setupDevtoolsPlugin, DevtoolsPluginApi, StateBase} from '@vue/devtools-a
 import {App} from 'vue'
 import {createGetStates} from './get-states'
 import {genInspectorTree} from './gen-inspector-tree'
-import {isSSR} from '@/is-ssr'
-import {AllKinds, drop, getType, getName, getDescription} from '@/utils'
+import {AllKinds, drop, getType, getName, getDescription, isSSR} from '@/utils'
 
 export type GetStates = () => Record<string, Omit<StateBase, 'key'>>
 

@@ -51,3 +51,7 @@ export const createUuid = (prefix: string = '') => {
     return prefix + count
   }
 }
+
+export const isSSR = (): boolean => {
+  return typeof window === 'undefined'
+}

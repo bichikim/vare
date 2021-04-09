@@ -1,5 +1,5 @@
 import {boot} from 'quasar/wrappers'
-import {state, mutate, compute, act, startDevtool} from 'vare'
+import {state, mutate, compute, act, startDevtool, subscribe} from 'vare'
 import {ref, Ref} from 'vue'
 
 type MayRef<T> = T | Ref<T>
@@ -49,8 +49,12 @@ export const updateName = act((name: string) => {
   return Promise.resolve().then(() => setNames(name))
 })
 
+subscribe(updateName, (info) => {
+  console.log(info)
+})
+
 export default boot(({app}) => {
   if (process.env.NODE_ENV === 'development') {
-    startDevtool(app, {foo, bar})
+    startDevtool(app as any, {foo, bar})
   }
 })

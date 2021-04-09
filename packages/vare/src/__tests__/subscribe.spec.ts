@@ -1,7 +1,7 @@
 import {act} from '@/act'
 import {mutate} from '@/mutate'
 import {state} from '@/state'
-import {subscribe, unsubscribe} from '@/subscribe'
+import {subscribe} from '@/subscribe'
 import {nextTick} from 'vue'
 import {compute} from '@/compute'
 
@@ -71,7 +71,8 @@ describe('subscribe', function test() {
     await nextTick()
 
     expect(actHook.mock.calls.length).toBe(1)
-    expect(actHook.mock.calls[0]).toEqual(['FOO'])
+    expect(actHook.mock.calls[0][0]).toEqual(['FOO'])
+    expect(actHook.mock.calls[0][1]).toEqual(null)
   })
 
   it('should subscribe mutation', async function test() {
@@ -88,7 +89,8 @@ describe('subscribe', function test() {
     await nextTick()
 
     expect(mutateHook.mock.calls.length).toBe(1)
-    expect(mutateHook.mock.calls[0]).toEqual(['FOO'])
+    expect(mutateHook.mock.calls[0][0]).toEqual(['FOO'])
+    expect(mutateHook.mock.calls[0][1]).toEqual(null)
   })
 
   it('should subscribe computation', async function test() {
@@ -111,7 +113,7 @@ describe('subscribe', function test() {
 
       const stateHook = jest.fn()
 
-      subscribe(foo, stateHook)
+      const stop = subscribe(foo, stateHook)
 
       foo.name = 'FOO'
 
@@ -122,7 +124,7 @@ describe('subscribe', function test() {
 
       stateHook.mockClear()
 
-      unsubscribe(foo, stateHook)
+      stop()
 
       foo.name = 'foo'
 
@@ -137,7 +139,7 @@ describe('subscribe', function test() {
 
       const actHook = jest.fn()
 
-      subscribe(action, actHook)
+      const stop = subscribe(action, actHook)
 
       action('FOO')
 
@@ -147,7 +149,7 @@ describe('subscribe', function test() {
 
       actHook.mockClear()
 
-      unsubscribe(action, actHook)
+      stop()
 
       action('foo')
 
@@ -159,7 +161,7 @@ describe('subscribe', function test() {
 
       const mutateHook = jest.fn()
 
-      subscribe(mutation, mutateHook)
+      const stop = subscribe(mutation, mutateHook)
 
       mutation('FOO')
 
@@ -169,7 +171,7 @@ describe('subscribe', function test() {
 
       mutateHook.mockClear()
 
-      unsubscribe(mutation, mutateHook)
+      stop()
 
       mutation('foo')
 
@@ -181,7 +183,7 @@ describe('subscribe', function test() {
 
       const computeHook = jest.fn()
 
-      subscribe(computation, computeHook)
+      const stop = subscribe(computation, computeHook)
 
       foo.name = 'FOO'
 
@@ -191,7 +193,7 @@ describe('subscribe', function test() {
 
       computeHook.mockClear()
 
-      unsubscribe(computation, computeHook)
+      stop()
 
       foo.name = 'foo'
 

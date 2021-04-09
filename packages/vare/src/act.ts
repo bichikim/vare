@@ -1,6 +1,6 @@
-import {fireSubscribe, SubscribeHook} from './subscribe'
-import {createUuid, getType, beVareMember, VareMember} from '@/utils'
-import {SUBSCRIPTIONS} from './symbol'
+import {SubscribeMember, WATCH_FLAG} from './subscribe'
+import {createUuid, getType, beVareMember} from '@/utils'
+import {ref} from 'vue-demi'
 
 const actionUuid = createUuid('unknown')
 
@@ -10,9 +10,7 @@ export type ActionIdentifierName = 'action'
 
 export const actionName: ActionIdentifierName = 'action'
 
-export interface ActionMember<Args extends any[]> extends VareMember {
-  [SUBSCRIPTIONS]: Set<SubscribeHook<Args>>
-}
+export type ActionMember<Args extends any[] = any[]> = SubscribeMember<Args>
 
 export type Action<Args extends any[], Return = any> = ((...args: Args) => Return | Promise<Return>) & ActionMember<Args>
 
@@ -24,16 +22,17 @@ export const act = <Args extends any[], Return>(
   recipe: ActionRecipe<Args, Return>,
   name?: string,
 ): Action<Args> => {
+  const flag = ref<any[] | null>(null)
+  const _name = name ?? actionUuid()
+
   const self: any = (...args: Args): Return | Promise<Return> => {
-    fireSubscribe(self, ...args)
+    flag.value = args
     return recipe(...args)
   }
-
-  const _name = name ?? actionUuid()
 
   const member = beVareMember<Action<Args>>(self, actionName, _name)
 
   return Object.assign(member, {
-    [SUBSCRIPTIONS]: new Set(),
+    [WATCH_FLAG]: flag,
   })
 }

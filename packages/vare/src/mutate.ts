@@ -1,7 +1,7 @@
 import {relateState, State} from './state'
-import {fireSubscribe, SubscribeHook} from './subscribe'
-import {createUuid, VareMember, getType, beVareMember} from './utils'
-import {SUBSCRIPTIONS} from './symbol'
+import {SubscribeMember, WATCH_FLAG} from './subscribe'
+import {createUuid, getType, beVareMember} from './utils'
+import {ref} from 'vue-demi'
 
 const mutationUuid = createUuid('unknown')
 
@@ -10,12 +10,7 @@ export type RelatedMutationRecipe<State, Args extends any[], Return> = (state: S
 
 export type MutationIdentifierName = 'mutation'
 
-export interface MutationMember<Args extends any[]> extends VareMember {
-  /**
-   * subscriptions
-   */
-  [SUBSCRIPTIONS]: Set<SubscribeHook<Args>>
-}
+export type MutationMember<Args extends any[]> = SubscribeMember<Args>
 
 export const mutationName: MutationIdentifierName = 'mutation'
 
@@ -65,12 +60,13 @@ export function mutate<Args extends any[], Return = any>(
 ): Mutation<Args>
 export function mutate(unknown, mayRecipe?: any, name?: string): Mutation<any> {
   const {state, recipe, name: _name} = getMutatePrams(unknown, mayRecipe, name)
+  const flag = ref<any[] | null>(null)
 
   // create executor
   const self: any = (...args: any[]): any => {
     const newArgs = state ? [state, ...args] : args
 
-    fireSubscribe(self, ...newArgs)
+    flag.value = args
     return recipe(...newArgs)
   }
 
@@ -80,7 +76,7 @@ export function mutate(unknown, mayRecipe?: any, name?: string): Mutation<any> {
    * Add additional values
    */
   const result = Object.assign(member, {
-    [SUBSCRIPTIONS]: new Set(),
+    [WATCH_FLAG]: flag,
   })
 
   // register mutation to state
