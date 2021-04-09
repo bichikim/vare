@@ -9,12 +9,6 @@
       "src/*": ["src/*"]
     },
     "plugins": [{"transform": "@zerollup/ts-transform-paths"}],
-    "typeRoots": [
-      "../../node_modules/@types",
-      "../../node_modules",
-      "./node_modules/@types",
-      "./node_modules"
-    ]
   },
   "include": [
     "src/**/*.ts",
