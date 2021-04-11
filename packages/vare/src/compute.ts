@@ -1,18 +1,18 @@
 import {info} from '@/info'
-import {relateState} from '@/state'
+import {AnyStateGroup, relateState} from '@/state'
 import {ComputedRef, WritableComputedRef} from '@vue/reactivity'
 import {computed} from 'vue-demi'
 import {createUuid, getIdentifier} from './utils'
 
 const computationUuid = createUuid('unknown')
 
-export type ComputationRecipe<Args extends any[], Return> = (...args: Args) => Return
+export type ComputationRecipe<Args extends any[] = any, Return = any> = (...args: Args) => Return
 
 export type ComputationGetter<Args extends any[], Return> = (...args: Args) => Return
 export type ComputationSetter<Args extends any[], Value> = (value: Value, ...args: Args) => any
 export type ComputationSetterWithState<S, Args extends any[], Value> = (state: S, value: Value, ...args: Args) => any
 
-export interface ComputationRecipeOptions<Args extends any[], Return> {
+export interface ComputationRecipeOptions<Args extends any[] = any, Return = any> {
   get: ComputationGetter<Args, Return>
   set: ComputationSetter<Args, Return>
 }
@@ -105,14 +105,55 @@ function _compute(unknown: any, mayRecipe?: any, name?: string): any {
   return self
 }
 
-function _treeCompute(unknown: any, mayTree?) {
-  //
+function _treeCompute(mayState: any, mayTree?) {
+  let tree
+  let state
+  if (mayTree) {
+    tree = mayTree
+    state = mayState
+  } else {
+    tree = mayState
+  }
+
+  return Object.keys(tree).reduce((result, name) => {
+    const value = tree[name]
+    if (state) {
+      result[name] = _compute(state, value, name)
+    } else {
+      result[name] = _compute(value, name)
+    }
+    return result
+  }, {} as Record<any, any>)
 }
 
-export function compute<Args extends any[], T> (recipe: ComputationRecipe<Args, T>, name?: string): Computation<Args, T>
-export function compute<S, Args extends any[], T> (state: S, recipe: ComputationRecipe<[S, ...Args], T>, name?: string): Computation<Args, T>
-export function compute<Args extends any[], T> (recipe: ComputationRecipeOptions<Args, T>, name?: string): ComputationWritable<Args, T>
-export function compute<S, Args extends any[], T> (state: S, recipe: ComputationRecipeOptionsWithState<S, Args, T>, name?: string): ComputationWritable<Args, T>
+export type ComputeParameters<T extends ComputationRecipe | ComputationRecipeOptions> = T extends (...args: infer P) => any ? P : (T extends {get: (...args: infer P) => any} ? P : never)
+export type ComputeDropParameters<T extends ComputationRecipe | ComputationRecipeOptions, S = any> = T extends (a: S, ...args: infer P) => any ? P : (T extends {get: (a: S, ...args: infer A) => any} ? A : never)
+
+export function compute<Args extends any[], T> (
+  recipe: ComputationRecipe<Args, T>,
+  name?: string,
+): Computation<Args, T>
+export function compute<S extends AnyStateGroup, Args extends any[], T> (
+  state: S,
+  recipe: ComputationRecipe<[S, ...Args], T>,
+  name?: string,
+): Computation<Args, T>
+export function compute<Args extends any[], T> (
+  recipe: ComputationRecipeOptions<Args, T>,
+  name?: string,
+): ComputationWritable<Args, T>
+export function compute<S extends AnyStateGroup, Args extends any[], T> (
+  state: S,
+  recipe: ComputationRecipeOptionsWithState<S, Args, T>,
+  name?: string,
+): ComputationWritable<Args, T>
+export function compute<Key extends string, Func extends ComputationRecipe> (
+  tree: Record<Key, Func>,
+): Record<Key, (...args: ComputeParameters<Func>) => ComputedRef<ReturnType<Func>>>
+export function compute<S extends AnyStateGroup, Key extends string, Func extends ComputationRecipe<[S, ...any[]]>> (
+  state: S,
+  tree: Record<Key, Func>,
+): Record<Key, (...args: ComputeDropParameters<Func>) => ComputedRef<ReturnType<Func>>>
 export function compute(unknown: any, mayTree?, name?: string): any {
   if (typeof unknown === 'function' || isRecipeOption(unknown) || typeof mayTree === 'function' || isRecipeOption(mayTree)) {
     return _compute(unknown, mayTree, name)

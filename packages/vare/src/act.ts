@@ -7,7 +7,7 @@ import {subscribe, SubscribeMember} from './subscribe'
 
 const actionUuid = createUuid('unknown')
 
-export type ActionRecipe<Args extends any[], Return> = (...args: Args) => Return | Promise<Return>
+export type ActionRecipe<Args extends any[] = any[], Return = any> = (...args: Args) => Return | Promise<Return>
 
 export type ActionIdentifierName = 'action'
 
@@ -62,7 +62,7 @@ const _treeAct = <K extends string, F extends AnyFunction> (
   }, {} as Record<any, any>)
 }
 
-export function act<K extends string, F extends AnyFunction> (tree: Record<K, F>): Record<K, (...args: Parameters<F>) => ReturnType<F>>
+export function act<K extends string, F extends ActionRecipe> (tree: Record<K, F>): Record<K, (...args: Parameters<F>) => ReturnType<F>>
 export function act<Args extends any[], Return> (
   recipe: ActionRecipe<Args, Return>,
   name?: string,

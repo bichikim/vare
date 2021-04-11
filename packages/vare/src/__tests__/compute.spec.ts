@@ -1,5 +1,6 @@
 import {compute, isComputation} from '@/compute'
 import {state} from '@/state'
+import {getName, getRelates} from '@/utils'
 import {shallowMount} from '@vue/test-utils'
 import {defineComponent, h, Ref, toRef} from 'vue'
 
@@ -22,11 +23,14 @@ const setup = () => {
     },
   })
 
-  const nameDeco = compute(() => foo.name + '-')
+  const tree = compute({
+    nameDeco: () => (foo.name + '-'),
+    nameStaticDeco: (deco: string) => (foo.name + deco),
+  })
 
-  const nameStaticDeco = compute((deco: string) => foo.name + deco)
-
-  const nameReactiveDeco = compute((deco: Ref<string>) => foo.name + deco.value)
+  const relateTree = compute(foo, {
+    nameReactiveDeco: (foo, deco: Ref<string>) => (foo.name + deco.value),
+  })
 
   const TestComponent = defineComponent({
     props: {
@@ -42,11 +46,11 @@ const setup = () => {
 
       const nameDecoReactiveSetRef = nameDecoReactiveSet(decoRef)
 
-      const nameDecoRef = nameDeco()
+      const nameDecoRef = tree.nameDeco()
 
-      const nameStaticDecoRef = nameStaticDeco(decoRef.value)
+      const nameStaticDecoRef = tree.nameStaticDeco(decoRef.value)
 
-      const nameReactiveDecoRef = nameReactiveDeco(decoRef)
+      const nameReactiveDecoRef = relateTree.nameReactiveDeco(decoRef)
 
       const handleNameDecoSetRef = (name: string) => {
         nameDecoSetRef.value = name
@@ -69,7 +73,11 @@ const setup = () => {
   })
 
   return {
-    TestComponent, nameDeco,
+    foo,
+    TestComponent,
+    nameDecoSet,
+    relateTree,
+    tree,
   }
 }
 
@@ -131,8 +139,22 @@ describe('compute', function test() {
     expect(wrapper.get('#setReactive').text()).toBe('change????')
   })
 
+  it('should tree has names', () => {
+    const {relateTree, tree} = setup()
+
+    expect(getName(tree.nameDeco)).toBe('nameDeco')
+    expect(getName(tree.nameStaticDeco)).toBe('nameStaticDeco')
+    expect(getName(relateTree.nameReactiveDeco)).toBe('nameReactiveDeco')
+  })
+
+  it('should tree has relation', () => {
+    const {relateTree, foo} = setup()
+
+    expect(getRelates(relateTree.nameReactiveDeco)?.has(foo)).toBeTruthy()
+  })
+
   it('should be computation', function test() {
-    const {nameDeco} = setup()
-    expect(isComputation(nameDeco)).toBe(true)
+    const {nameDecoSet} = setup()
+    expect(isComputation(nameDecoSet)).toBe(true)
   })
 })
