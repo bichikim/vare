@@ -3,7 +3,8 @@ import {computed, watch, WatchStopHandle, Ref, WatchCallback, ComputedRef} from 
 import {Action} from './act'
 import {Computation, ComputationWritable} from './compute'
 import {Mutation} from './mutate'
-import {VareMember, getType} from '@/utils'
+import {VareMember, getIdentifier} from '@/utils'
+import {info} from '@/info'
 
 export const WATCH_FLAG = Symbol('watch-flag')
 
@@ -17,9 +18,14 @@ export interface SubscribeMember<Args extends any[] = any[]> extends VareMember 
 export type SubscribeTarget = Mutation<any> | Action<any> | Computation<any, any> | ComputationWritable<any, any>
 
 export const setSubscribe = (target: SubscribeTarget, hook: WatchCallback<any>): WatchStopHandle => {
-  const watchFlag = target[WATCH_FLAG]
+  const targetInfo = info.get(target)
+  if (targetInfo?.watchFlag) {
+    const watchFlag = targetInfo.watchFlag
 
-  return watch(watchFlag, hook)
+    return watch(watchFlag, hook)
+  }
+
+  return () => null
 }
 
 export const watchTarget = (target: any, hook: SubscribeHookArgs<any>): WatchStopHandle => {
@@ -41,7 +47,7 @@ export function subscribe(
   target,
   hook,
 ) {
-  const type = getType(target)
+  const type = getIdentifier(target)
   // when Mutation, Action or Computation
   if (type === 'mutation' || type === 'action') {
     return setSubscribe(target, hook)

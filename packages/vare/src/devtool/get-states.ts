@@ -1,7 +1,7 @@
 import {State} from '@/state'
 import {StateBase} from '@vue/devtools-api'
 
-export type StateBases = Record<string, Omit<StateBase, 'key'>>
+export type StateBases = Record<string, StateBase>
 
 export const createGetStates = (states: Record<string, State<any>>) => {
   let cache: StateBases
@@ -14,6 +14,7 @@ export const createGetStates = (states: Record<string, State<any>>) => {
     cache = Object.keys(states).reduce<StateBases>((result, key: string) => {
       const value = states[key]
       result[key] = {
+        key,
         value,
         editable: true,
         objectType: 'reactive',

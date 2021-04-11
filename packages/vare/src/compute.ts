@@ -1,8 +1,8 @@
+import {info} from '@/info'
+import {relateState} from '@/state'
 import {ComputedRef, WritableComputedRef} from '@vue/reactivity'
 import {computed} from 'vue-demi'
-import {getType, VareMember, beVareMember, createUuid} from './utils'
-import {relateState} from '@/state'
-import {COMPUTATION_TYPE} from './symbol'
+import {createUuid, getIdentifier} from './utils'
 
 const computationUuid = createUuid('unknown')
 
@@ -28,19 +28,16 @@ export const computationName: ComputationIdentifierName = 'computation'
 
 export type ComputationType = 'getter' | 'getter & setter'
 
-export interface ComputationMember extends VareMember {
-  [COMPUTATION_TYPE]: ComputationType
-}
-
-export type Computation<Args extends any[], T> = ((...args: Args) => ComputedRef<T>) & ComputationMember
-export type ComputationWritable<Args extends any[], T> = ((...args: Args) => WritableComputedRef<T>) & ComputationMember
+export type Computation<Args extends any[], T> = ((...args: Args) => ComputedRef<T>)
+export type ComputationWritable<Args extends any[], T> = ((...args: Args) => WritableComputedRef<T>)
 
 export const isComputation = (value?: any): value is Computation<any[], any> | ComputationWritable<any[], any> => {
-  return getType(value) === computationName
+  return getIdentifier(value) === computationName
 }
 
-export const getComputationType = (value: Computation<any, any>): ComputationType => {
-  return value[COMPUTATION_TYPE]
+export const getComputationType = (value: Computation<any, any>): ComputationType | unknown => {
+  const valueInfo = info.get(value)
+  return valueInfo?.type
 }
 
 const isRecipeOption = (value?: any): value is ComputationRecipe<any, any> => {
@@ -72,11 +69,7 @@ const getComputePrams = (unknown: any, mayRecipe?: any, name?: string) => {
   }
 }
 
-export function compute<Args extends any[], T>(recipe: ComputationRecipe<Args, T>, name?: string): Computation<Args, T>
-export function compute<S, Args extends any[], T>(state: S, recipe: ComputationRecipe<[S, ...Args], T>, name?: string): Computation<Args, T>
-export function compute<Args extends any[], T>(recipe: ComputationRecipeOptions<Args, T>, name?: string): ComputationWritable<Args, T>
-export function compute<S, Args extends any[], T>(state: S, recipe: ComputationRecipeOptionsWithState<S, Args, T>, name?: string): ComputationWritable<Args, T>
-export function compute(unknown: any, mayRecipe?: any, name?: string): any {
+function _compute(unknown: any, mayRecipe?: any, name?: string): any {
   const {state, name: _name, recipe} = getComputePrams(unknown, mayRecipe, name)
 
   const self = (...args: any[]): any => {
@@ -98,15 +91,31 @@ export function compute(unknown: any, mayRecipe?: any, name?: string): any {
     return computedValue
   }
 
-  const member = beVareMember(self, computationName, _name)
-
-  const result = Object.assign(member, {
-    [COMPUTATION_TYPE]: typeof recipe === 'function' ? 'getter' : 'getter & setter',
+  info.set(self, {
+    relates: new Set(),
+    name: _name,
+    identifier: computationName,
+    type: typeof recipe === 'function' ? 'getter' : 'getter & setter',
   })
 
   if (state) {
-    relateState(state, result)
+    relateState(state, self)
   }
 
-  return result
+  return self
+}
+
+function _treeCompute(unknown: any, mayTree?) {
+  //
+}
+
+export function compute<Args extends any[], T> (recipe: ComputationRecipe<Args, T>, name?: string): Computation<Args, T>
+export function compute<S, Args extends any[], T> (state: S, recipe: ComputationRecipe<[S, ...Args], T>, name?: string): Computation<Args, T>
+export function compute<Args extends any[], T> (recipe: ComputationRecipeOptions<Args, T>, name?: string): ComputationWritable<Args, T>
+export function compute<S, Args extends any[], T> (state: S, recipe: ComputationRecipeOptionsWithState<S, Args, T>, name?: string): ComputationWritable<Args, T>
+export function compute(unknown: any, mayTree?, name?: string): any {
+  if (typeof unknown === 'function' || isRecipeOption(unknown) || typeof mayTree === 'function' || isRecipeOption(mayTree)) {
+    return _compute(unknown, mayTree, name)
+  }
+  return _treeCompute(unknown, mayTree)
 }

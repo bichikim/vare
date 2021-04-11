@@ -1,5 +1,5 @@
 import {boot} from 'quasar/wrappers'
-import {state, mutate, compute, act, startDevtool, subscribe} from 'vare'
+import {state, mutate, compute, act, startDevtool, subscribe, describe} from 'vare'
 import {ref, Ref} from 'vue'
 
 type MayRef<T> = T | Ref<T>
@@ -29,8 +29,6 @@ export const setNames = mutate([foo, bar], ([foo, bar], value: string) => {
   bar.name = value
 }, 'setNames')
 
-setNames.description = 'set foo & bar names'
-
 export const getDeepBarDeco = compute(foo, (foo, deco: MayRef<string>) => {
   const decoRef = ref(deco)
   return `${decoRef.value}${foo.deep.bar}${decoRef.value}`
@@ -55,6 +53,7 @@ subscribe(updateName, (info) => {
 
 export default boot(({app}) => {
   if (process.env.NODE_ENV === 'development') {
+    describe(setNames, 'set foo & bar names')
     startDevtool(app as any, {foo, bar})
   }
 })

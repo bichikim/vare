@@ -1,5 +1,5 @@
 <template>
-  <q-page class="row items-center justify-evenly">
+  <q-page class="column items-center justify-evenly">
     <example-component
       title="Example component"
       active
