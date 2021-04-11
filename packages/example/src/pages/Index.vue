@@ -10,6 +10,7 @@
     <div>{{ fooArrayOne }}</div>
     <div>{{ fooDeepBar }}</div>
     <button @click="updateName(fooName + '!')">update</button>
+    <button @click="setDeepBar(fooDeepBar + '!')">set deep bar</button>
   </q-page>
 </template>
 
@@ -17,7 +18,7 @@
 import {Todo, Meta} from 'components/models'
 import ExampleComponent from 'components/CompositionComponent.vue'
 import {defineComponent, ref, computed} from 'vue'
-import {foo, updateName} from 'src/boot/vare'
+import {foo, updateName, setDeepBar} from 'src/boot/vare'
 
 export default defineComponent({
   name: 'PageIndex',
@@ -51,7 +52,7 @@ export default defineComponent({
     const meta = ref<Meta>({
       totalCount: 1200,
     })
-    return {todos, meta, fooName, fooArrayOne, fooDeepBar, updateName}
+    return {todos, meta, fooName, fooArrayOne, fooDeepBar, updateName, setDeepBar}
   },
 })
 </script>

@@ -208,6 +208,70 @@ stopGetDecoName()
 
 ```
 
+## Naming (for devtool)
+
+```typescript
+import {state, compute, mutate, getName} from './src/index'
+
+const foo = state({
+  name: 'foo'
+}, 'foo')
+
+const getFooName = compute(() => (foo.name), 'getFooName')
+const setFooName = mutate((name: string) => {
+  foo.name = name
+}, 'setFooName')
+
+getName(foo) // foo
+getName(getFooName) // getFooName
+getName(setFooName) // getFooName
+
+```
+
+Are you sick of naming? 
+
+Try to make a tree!
+```typescript
+import {state, compute, mutate, getName, act} from './src/index'
+
+const foo = state({
+  name: 'foo'
+})
+
+export const computations = compute({
+  getName: () => (foo.name)
+})
+
+export const mutations = mutate({
+  setName: (name: string) => {
+    foo.name = name
+  }
+})
+
+export const actions = act({
+  updateName: (name: string) => {
+    return Promise.resolve().then(() => {
+      mutations.setName(name)
+    })
+  }
+})
+
+const tree = {
+  state: foo,
+  ...computations,
+  ...mutations,
+  ...actions,
+}
+
+const name = tree.getName()
+tree.setName('bar')
+getName(tree.getName) // getName
+getName(tree.setName) // setName
+getName(tree.updateName) // updateName
+
+```
+
+
 ## Why 
 
 Share state wherever you want
@@ -384,10 +448,8 @@ const FooComponent = defineComponent(() => {
 
 ## Supporting Vue DevTool ?
 
-Yes! 
+Yes!
 
-- state (DONE) \
-![state-devtool](media/state-devtool.png)
-- computation (WIP)
-- mutation (WIP)
-- action (WIP)
+![devtool](media/devtool.PNG)
+![devtool](media/devtool1.PNG)
+![devtool](media/devtool2.PNG)

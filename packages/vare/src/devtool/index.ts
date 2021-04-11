@@ -1,6 +1,6 @@
 import {State} from '@/state'
 import {subscribe} from '@/subscribe'
-import {AllKinds, drop, getName, isSSR, setName} from '@/utils'
+import {AllKinds, drop, getIdentifier, getName, isSSR, setName, setPlayground} from '@/utils'
 import {DevtoolsPluginApi, setupDevtoolsPlugin, StateBase, TimelineEvent} from '@vue/devtools-api'
 import {App} from 'vue'
 import {genInspectorTree} from './gen-inspector-tree'
@@ -112,14 +112,25 @@ export const getDevtool = (app: App, states: Record<string, State<any>>) => {
 
       const state = states[payload.nodeId]
 
-      if (!state) {
+      if (state) {
+        const path = drop(payload.path)
+        const value = payload.state.value
+
+        payload.set(state, path, value)
+
         return
       }
 
-      const path = drop(payload.path)
-      const value = payload.state.value
+      const member = relationMap.get(payload.nodeId)
 
-      payload.set(state, path, value)
+      const type = getIdentifier(member)
+
+      if (type === 'computation' && payload.path.includes('args')) {
+        setPlayground(member, {
+          args: payload.state.value,
+          // return: member(payload.state.value).value,
+        })
+      }
     })
   })
 

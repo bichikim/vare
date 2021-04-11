@@ -13,6 +13,7 @@ export type Identifier = MutationIdentifierName
   | ActionIdentifierName
 
 export interface VareMember {
+  playground?: any
   identifier: Identifier
   relates: Set<AllKinds>
   name?: string
@@ -35,6 +36,18 @@ export const setName = (value: AllKinds, name: string) => {
   const valueInfo = info.get(value)
   if (valueInfo) {
     valueInfo.name = name
+  }
+}
+
+export const getPlayground = (target: AllKinds): any | undefined => {
+  const valueInfo = info.get(target)
+  return valueInfo?.playground
+}
+
+export const setPlayground = (target: AllKinds, value: any): void => {
+  const valueInfo = info.get(target)
+  if (valueInfo) {
+    valueInfo.playground = value
   }
 }
 

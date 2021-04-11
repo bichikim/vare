@@ -1,4 +1,4 @@
-import {AllKinds, getDescription, getName, getIdentifier, getRelates} from '@/utils'
+import {AllKinds, getDescription, getName, getIdentifier, getRelates, getPlayground} from '@/utils'
 import {CustomInspectorState} from '@vue/devtools-api'
 
 export const genNoneStateInfo = (target: AllKinds): CustomInspectorState => {
@@ -28,8 +28,32 @@ export const genNoneStateInfo = (target: AllKinds): CustomInspectorState => {
         },
         editable: false,
       },
-
     ],
+  }
+
+  if (type === 'computation') {
+    const playground = getPlayground(target)
+    const args = playground?.args
+    let returnValue
+
+    try {
+      returnValue = target(args).value
+    } catch {
+      // skip
+    }
+
+    result.playground = [
+      {
+        key: 'args',
+        value: playground?.args,
+        editable: true,
+      },
+      {
+        key: 'return',
+        value: returnValue,
+        editable: false,
+      },
+    ]
   }
 
   if (description) {
