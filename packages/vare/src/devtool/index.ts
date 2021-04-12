@@ -155,7 +155,7 @@ export const getDevtool = (app: App, states: Record<string, State<any>>) => {
   }
 
   const updateState = () => {
-    _api.sendInspectorState(inspectorId)
+    _api?.sendInspectorState(inspectorId)
   }
 
   return {
