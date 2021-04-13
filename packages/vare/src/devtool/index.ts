@@ -1,30 +1,47 @@
 import {State} from '@/state'
-import {setupDevtoolsPlugin, DevtoolsPluginApi, StateBase} from '@vue/devtools-api'
+import {subscribe} from '@/subscribe'
+import {AllKinds, drop, getIdentifier, getName, isSSR, setName, setPlayground} from '@/utils'
+import {DevtoolsPluginApi, setupDevtoolsPlugin, StateBase, TimelineEvent} from '@vue/devtools-api'
 import {App} from 'vue'
-import {createGetStates} from './get-states'
 import {genInspectorTree} from './gen-inspector-tree'
-import {isSSR} from '@/is-ssr'
+import {genNoneStateInfo} from './gen-none-state-info'
+import {createGetStates} from './get-states'
 
 export type GetStates = () => Record<string, Omit<StateBase, 'key'>>
 
 export const DEVTOOL_ID = 'com.npmjs.packages.vare'
 
-export const drop = (array: any[]) => {
-  const value = [...array]
-  value.shift()
-  return value
+export const getNamedStates = (states: Record<string, State<any>>): Record<string, State<any>> => {
+  return Object.keys(states).reduce((result, key) => {
+    const state = states[key]
+    let name = getName(state)
+
+    if (!name) {
+      name = key
+      setName(state, key)
+    }
+
+    result[name] = state
+    return result
+  }, {})
 }
 
-export const startDevtool = (app: App, states: Record<string, State<any>>) => {
+export type EventKind = 'action' | 'mutation'
+
+export const getDevtool = (app: App, states: Record<string, State<any>>) => {
   if (isSSR()) {
     return
   }
 
   let _api: DevtoolsPluginApi
   const inspectorId = 'vare-structure'
-  const actionTimelineId = 'vare-action'
-  const mutationTimeLineId = 'var-mutation'
-  const getStates = createGetStates(states)
+  const timelineIds: Record<EventKind, string> = {
+    action: 'vare-action',
+    mutation: 'var-mutation',
+  }
+  let relationMap: Map<string, AllKinds> = new Map<string, AllKinds>()
+  const _states = getNamedStates(states)
+  const getStates = createGetStates(_states)
 
   setupDevtoolsPlugin({
     app,
@@ -43,13 +60,13 @@ export const startDevtool = (app: App, states: Record<string, State<any>>) => {
     })
 
     api.addTimelineLayer({
-      id: actionTimelineId,
+      id: timelineIds.action,
       label: 'Vare Actions',
       color: 0xf08d49,
     })
 
     api.addTimelineLayer({
-      id: mutationTimeLineId,
+      id: timelineIds.mutation,
       label: 'Vare Mutation',
       color: 0x3eaf7c,
     })
@@ -59,7 +76,10 @@ export const startDevtool = (app: App, states: Record<string, State<any>>) => {
         return
       }
 
-      payload.rootNodes = genInspectorTree(states)
+      const {nodes, relationMap: _relationMap} = genInspectorTree(_states)
+      relationMap = _relationMap
+
+      payload.rootNodes = nodes
     })
 
     api.on.getInspectorState((payload) => {
@@ -69,15 +89,20 @@ export const startDevtool = (app: App, states: Record<string, State<any>>) => {
 
       const states = getStates()
 
-      payload.state = {
-        state: [{
-          key: payload.nodeId,
-          ...states[payload.nodeId],
-        }],
-        computation: [],
-        mutation: [],
-        action: [],
+      const state = states[payload.nodeId]
+
+      // if user select the state
+      if (state) {
+        payload.state = {
+          state: [state],
+        }
+        return
       }
+
+      // if user select the mutation, computation or action
+      const member = relationMap.get(payload.nodeId)
+
+      payload.state = genNoneStateInfo(member)
     })
 
     api.on.editInspectorState((payload) => {
@@ -87,29 +112,77 @@ export const startDevtool = (app: App, states: Record<string, State<any>>) => {
 
       const state = states[payload.nodeId]
 
-      if (!state) {
+      if (state) {
+        const path = drop(payload.path)
+        const value = payload.state.value
+
+        payload.set(state, path, value)
+
         return
       }
 
-      const path = drop(payload.path)
-      const value = payload.state.value
+      const member = relationMap.get(payload.nodeId)
 
-      payload.set(state, path, value)
+      const type = getIdentifier(member)
+
+      if (type === 'computation' && payload.path.includes('args')) {
+        setPlayground(member, {
+          args: payload.state.value,
+          // return: member(payload.state.value).value,
+        })
+      }
     })
   })
+
+  const updateTimeline = (kind: EventKind, event: Omit<TimelineEvent, 'time' | 'data'>, all?: boolean) => {
+    const layerId = timelineIds[kind]
+
+    _api?.addTimelineEvent({
+      layerId,
+      event: {
+        ...event,
+        time: Date.now(),
+        data: {
+          type: kind,
+        },
+      },
+      all,
+    })
+  }
 
   const updateTree = () => {
     _api?.sendInspectorTree(inspectorId)
   }
 
   const updateState = () => {
-    _api.sendInspectorState(inspectorId)
+    _api?.sendInspectorState(inspectorId)
   }
 
-  updateTree()
-
   return {
+    updateTimeline,
     updateTree,
     updateState,
   }
+}
+
+export let devtools: undefined | ReturnType<typeof getDevtool>
+
+export const startDevtool = (app: App, states: Record<string, State<any>>) => {
+  const tools = getDevtool(app, states)
+
+  if (tools) {
+    devtools = tools
+    const {updateState} = tools
+
+    // updating state
+    Object.keys(states).forEach((key) => {
+      const state = states[key]
+
+      subscribe(state, () => updateState())
+    })
+
+    tools.updateTree()
+  }
+
+  return tools
 }
