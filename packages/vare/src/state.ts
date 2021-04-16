@@ -35,12 +35,19 @@ export const relate = (state: State<any>, target: AllKinds) => {
   }
 }
 
-export const relateState = (state: State<any> | State<any>[] | Record<string, State<any>>, target: AllKinds) => {
+export const relateState = (state: AnyStateGroup, target: AllKinds) => {
   if (isState(state)) {
     relate(state, target)
     return
   }
+
+  /* istanbul ignore if [array type has a type error :(] */
   if (Array.isArray(state)) {
+    /* istanbul ignore if [no need to test for env development] */
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('An array relation type has a type error. Please use an object type. sorry~')
+    }
+
     (state as State<any>[]).forEach((item) => {
       if (isState(item)) {
         relate(item, target)
@@ -48,6 +55,7 @@ export const relateState = (state: State<any> | State<any>[] | Record<string, St
     })
     return
   }
+
   if (typeof state === 'object') {
     Object.keys(state).forEach((key) => {
       const item: State<any> = state[key]

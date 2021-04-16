@@ -7,6 +7,10 @@ import {info} from '@/info'
 
 export type AllKinds = State<any> | Mutation<any> | Computation<any, any> | Action<any>
 
+export interface PlaygroundInfo {
+  args: any
+}
+
 export type Identifier = MutationIdentifierName
   | StateIdentifierName
   | ComputationIdentifierName
@@ -14,7 +18,7 @@ export type Identifier = MutationIdentifierName
   | ComputationRefIdentifierName
 
 export interface VareMember {
-  playground?: any
+  playground?: PlaygroundInfo
   identifier: Identifier
   relates: Set<AllKinds>
   name?: string
@@ -23,16 +27,32 @@ export interface VareMember {
   watchFlag?: Ref<any>
 }
 
+/**
+ * get item identifier refer to Identifier
+ * only work in development NODE_ENV
+ * @param value
+ */
 export const getIdentifier = (value?: AllKinds): undefined | Identifier => {
   const valueInfo = info.get(value)
   return valueInfo?.identifier
 }
 
+/**
+ * get item name
+ * only work in development NODE_ENV
+ * @param value
+ */
 export const getName = (value?: AllKinds) => {
   const valueInfo = info.get(value)
   return valueInfo?.name
 }
 
+/**
+ * get item name
+ * only work in development NODE_ENV
+ * @param value
+ * @param name
+ */
 export const setName = (value: AllKinds, name: string) => {
   const valueInfo = info.get(value)
   if (valueInfo) {
@@ -40,12 +60,23 @@ export const setName = (value: AllKinds, name: string) => {
   }
 }
 
+/**
+ * get playground data for devtool (computation only)
+ * only work in development NODE_ENV
+ * @param target
+ */
 export const getPlayground = (target: AllKinds): any | undefined => {
   const valueInfo = info.get(target)
   return valueInfo?.playground
 }
 
-export const setPlayground = (target: AllKinds, value: any): void => {
+/**
+ * get playground data for devtool (computation only)
+ * only work in development NODE_ENV
+ * @param target
+ * @param value
+ */
+export const setPlayground = (target: AllKinds, value: PlaygroundInfo): void => {
   const valueInfo = info.get(target)
   if (valueInfo) {
     valueInfo.playground = value
@@ -83,5 +114,6 @@ export const createUuid = (prefix: string = '') => {
 }
 
 export const isSSR = (): boolean => {
+  /* istanbul ignore next [no way to test] */
   return typeof window === 'undefined'
 }

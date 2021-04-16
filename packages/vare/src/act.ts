@@ -19,6 +19,11 @@ export type Action<Args extends any[], Return = any> =
   ((...args: Args) => Return | Promise<Return>)
   & ActionMember<Args>
 
+/**
+ * check if it is an action
+ * only work in development NODE_ENV
+ * @param value
+ */
 export const isAction = (value?: any): value is Action<any> => {
   return getIdentifier(value) === actionName
 }

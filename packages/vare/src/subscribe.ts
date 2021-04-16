@@ -25,6 +25,7 @@ export const setSubscribe = (target: SubscribeTarget, hook: WatchCallback<any>):
     return watch(watchFlag, hook)
   }
 
+  /* istanbul ignore next [no need to test without development env] */
   return () => null
 }
 
