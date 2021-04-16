@@ -19,6 +19,7 @@ const setup = () => {
   const nameDecoReactiveSet = compute({
     get: (deco: Ref<string>) => foo.name + deco.value,
     set: (name: string, deco: Ref<string>) => {
+      console.log(deco)
       foo.name = name + deco.value
     },
   })
