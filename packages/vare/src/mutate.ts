@@ -1,4 +1,4 @@
-import {DropParameters} from '@/types'
+import {Tree, TreeDrop} from '@/types'
 import {ref} from 'vue-demi'
 import {devtools} from './devtool'
 import {info} from './info'
@@ -9,7 +9,7 @@ import {createUuid, getIdentifier} from './utils'
 const mutationUuid = createUuid('unknown')
 
 export type MutationRecipe<Args extends any[] = any, Return = any> = (...args: Args) => Return
-export type MutationStateRecipe<S, Args extends any[] = any, Return = any> = (s: S, ...args: Args) => Return
+export type MutationStateRecipe<S = any, Args extends any[] = any, Return = any> = (s: S, ...args: Args) => Return
 export type RelatedMutationRecipe<State, Args extends any[], Return> = (state: State, ...args: Args) => Return
 
 export type MutationIdentifierName = 'mutation'
@@ -126,13 +126,13 @@ export function mutate<Args extends any[], Return = any> (
   recipe: MutationRecipe<Args, Return>,
   name?: string,
 ): Mutation<Args>
-export function mutate<Key extends string, Func extends MutationRecipe> (
-  tree: Record<Key, Func>,
-): Record<Key, (...args: Parameters<Func>) => ReturnType<Func>>
-export function mutate<S extends AnyStateGroup, Key extends string, Func extends MutationStateRecipe<S>> (
+export function mutate<Func extends MutationRecipe, TreeOptions extends Record<string, Func>> (
+  tree: TreeOptions,
+): Tree<TreeOptions>
+export function mutate<S extends AnyStateGroup, Func extends MutationStateRecipe<S>, TreeOptions extends Record<string, Func>> (
   state: S,
-  tree: Record<Key, Func>,
-): Record<Key, (...args: DropParameters<Func, S>) => ReturnType<Func>>
+  tree: TreeOptions,
+): TreeDrop<TreeOptions, S>
 export function mutate(unknown, mayTree?, name?: string): any {
   if (typeof unknown === 'function' || typeof mayTree === 'function') {
     return _mutate(unknown, mayTree, name)

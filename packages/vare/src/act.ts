@@ -1,5 +1,5 @@
 import {info} from '@/info'
-import {AnyFunction} from '@/types'
+import {AnyFunction, Tree} from '@/types'
 import {createUuid, getIdentifier} from '@/utils'
 import {ref} from 'vue-demi'
 import {devtools} from './devtool'
@@ -62,7 +62,7 @@ const _treeAct = <K extends string, F extends AnyFunction> (
   }, {} as Record<any, any>)
 }
 
-export function act<K extends string, F extends ActionRecipe> (tree: Record<K, F>): Record<K, (...args: Parameters<F>) => ReturnType<F>>
+export function act<Func extends ActionRecipe, TreeOptions extends Record<string, Func>> (tree: TreeOptions): Tree<TreeOptions>
 export function act<Args extends any[], Return> (
   recipe: ActionRecipe<Args, Return>,
   name?: string,

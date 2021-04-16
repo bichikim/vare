@@ -1,5 +1,6 @@
 import {info} from '@/info'
 import {AnyStateGroup, relateState} from '@/state'
+import {AnyFunction, DropParameters} from '@/types'
 import {ComputedRef, WritableComputedRef} from '@vue/reactivity'
 import {computed} from 'vue-demi'
 import {createUuid, getIdentifier} from './utils'
@@ -129,6 +130,16 @@ function _treeCompute(mayState: any, mayTree?) {
 export type ComputeParameters<T extends ComputationRecipe | ComputationRecipeOptions> = T extends (...args: infer P) => any ? P : (T extends {get: (...args: infer P) => any} ? P : never)
 export type ComputeDropParameters<T extends ComputationRecipe | ComputationRecipeOptions, S = any> = T extends (a: S, ...args: infer P) => any ? P : (T extends {get: (a: S, ...args: infer A) => any} ? A : never)
 
+// type KeyOfReturnType = <>
+
+export type ComputeTree<T extends Record<string, AnyFunction>> = {
+  [P in keyof T]: (...args: Parameters<T[P]>) => ComputedRef<ReturnType<T[P]>>
+}
+
+export type ComputeTreeDrop<T extends Record<string, AnyFunction>, S = any> = {
+  [P in keyof T]: (...args: DropParameters<T[P], S>) => ComputedRef<ReturnType<T[P]>>
+}
+
 export function compute<Args extends any[], T> (
   recipe: ComputationRecipe<Args, T>,
   name?: string,
@@ -147,13 +158,13 @@ export function compute<S extends AnyStateGroup, Args extends any[], T> (
   recipe: ComputationRecipeOptionsWithState<S, Args, T>,
   name?: string,
 ): ComputationWritable<Args, T>
-export function compute<Key extends string, Func extends ComputationRecipe> (
-  tree: Record<Key, Func>,
-): Record<Key, (...args: ComputeParameters<Func>) => ComputedRef<ReturnType<Func>>>
-export function compute<S extends AnyStateGroup, Key extends string, Func extends ComputationStateRecipe<S>> (
+export function compute<Func extends ComputationRecipe, TreeOptions extends Record<string, Func>> (
+  tree: TreeOptions,
+): ComputeTree<TreeOptions>
+export function compute<S extends AnyStateGroup, Func extends ComputationStateRecipe<S>, TreeOptions extends Record<string, Func>> (
   state: S,
-  tree: Record<Key, Func>,
-): Record<Key, (...args: ComputeDropParameters<Func>) => ComputedRef<ReturnType<Func>>>
+  tree: TreeOptions,
+): ComputeTreeDrop<TreeOptions, S>
 export function compute(unknown: any, mayTree?, name?: string): any {
   if (typeof unknown === 'function' || isRecipeOption(unknown) || typeof mayTree === 'function' || isRecipeOption(mayTree)) {
     return _compute(unknown, mayTree, name)
