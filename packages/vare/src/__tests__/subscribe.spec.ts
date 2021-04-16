@@ -4,6 +4,7 @@ import {state} from '@/state'
 import {subscribe} from '@/subscribe'
 import {nextTick} from 'vue'
 import {compute} from '@/compute'
+process.env.NODE_ENV = 'development'
 
 const setup = () => {
   const foo = state({

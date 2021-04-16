@@ -1,6 +1,7 @@
 import {shallowMount} from '@vue/test-utils'
 import {defineComponent, h, computed, nextTick} from 'vue'
 import {state} from '@/state'
+process.env.NODE_ENV = 'development'
 
 const foo = state({
   name: 'foo',

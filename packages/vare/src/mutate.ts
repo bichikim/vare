@@ -65,25 +65,25 @@ function _mutate(unknown, mayRecipe?: any, name?: string): Mutation<any> {
     return recipe(...newArgs)
   }
 
-  info.set(self, {
-    name: _name,
-    identifier: mutationName,
-    relates: new Set(),
-    watchFlag: flag,
-  })
-
-  // devtool
   if (process.env.NODE_ENV === 'development') {
+    info.set(self, {
+      name: _name,
+      identifier: mutationName,
+      relates: new Set(),
+      watchFlag: flag,
+    })
+
+    // devtool
     subscribe(self, () => {
       devtools?.updateTimeline('mutation', {
         title: _name,
       })
     })
-  }
 
-  // register mutation to state
-  if (state) {
-    relateState(state, self)
+    // register mutation to state
+    if (state) {
+      relateState(state, self)
+    }
   }
 
   return self

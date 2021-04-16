@@ -1,6 +1,6 @@
 import {State, StateIdentifierName} from '@/state'
 import {Mutation, MutationIdentifierName} from '@/mutate'
-import {Computation, ComputationIdentifierName} from '@/compute'
+import {Computation, ComputationIdentifierName, ComputationRefIdentifierName} from '@/compute'
 import {Action, ActionIdentifierName} from '@/act'
 import {Ref} from 'vue-demi'
 import {info} from '@/info'
@@ -11,6 +11,7 @@ export type Identifier = MutationIdentifierName
   | StateIdentifierName
   | ComputationIdentifierName
   | ActionIdentifierName
+  | ComputationRefIdentifierName
 
 export interface VareMember {
   playground?: any
@@ -18,7 +19,7 @@ export interface VareMember {
   relates: Set<AllKinds>
   name?: string
   description?: string
-  type?: string
+  type?: string | undefined
   watchFlag?: Ref<any>
 }
 

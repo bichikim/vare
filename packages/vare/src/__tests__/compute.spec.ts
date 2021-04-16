@@ -3,6 +3,7 @@ import {state} from '@/state'
 import {getName, getRelates} from '@/utils'
 import {shallowMount} from '@vue/test-utils'
 import {defineComponent, h, Ref, toRef} from 'vue'
+process.env.NODE_ENV = 'development'
 
 const setup = () => {
   const foo = state({

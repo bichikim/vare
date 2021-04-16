@@ -64,11 +64,13 @@ export const relateState = (state: State<any> | State<any>[] | Record<string, St
 export const state = <S extends AnyObject>(initState: S, name?: string): State<S> => {
   const state = reactive<S>(initState)
 
-  info.set(state, {
-    identifier: stateType,
-    name,
-    relates: new Set(),
-  })
+  if (process.env.NODE_ENV === 'development') {
+    info.set(state, {
+      identifier: stateType,
+      name,
+      relates: new Set(),
+    })
+  }
 
   return state
 }

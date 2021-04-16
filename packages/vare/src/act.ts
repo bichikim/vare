@@ -35,14 +35,14 @@ const _act = <Args extends any[], Return> (
     return recipe(...args)
   }
 
-  info.set(self, {
-    name: _name,
-    identifier: actionName,
-    relates: new Set(),
-    watchFlag: flag,
-  })
-
   if (process.env.NODE_ENV === 'development') {
+    info.set(self, {
+      name: _name,
+      identifier: actionName,
+      relates: new Set(),
+      watchFlag: flag,
+    })
+
     subscribe(self, () => {
       devtools?.updateTimeline('action', {
         title: _name,

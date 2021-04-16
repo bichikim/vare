@@ -1,6 +1,7 @@
 import {mutate, isMutation} from '@/mutate'
 import {state} from '@/state'
 import {getName, getRelates} from '@/utils'
+process.env.NODE_ENV = 'development'
 
 const setup = () => {
   const foo = state({

@@ -1,6 +1,7 @@
 import {act, isAction} from '@/act'
 import {mutate} from '@/mutate'
 import {state} from '@/state'
+process.env.NODE_ENV = 'development'
 
 const foo = state({
   name: 'foo',

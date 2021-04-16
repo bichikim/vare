@@ -3,7 +3,7 @@ import {AnyStateGroup, relateState} from '@/state'
 import {AnyFunction, DropParameters} from '@/types'
 import {ComputedRef, WritableComputedRef} from '@vue/reactivity'
 import {computed} from 'vue-demi'
-import {createUuid, getIdentifier} from './utils'
+import {AllKinds, createUuid, getIdentifier, getName, getRelates} from './utils'
 
 const computationUuid = createUuid('unknown')
 
@@ -40,8 +40,10 @@ export interface ComputationRecipeOptionsWithState<S, Args extends any[], Return
 }
 
 export type ComputationIdentifierName = 'computation'
+export type ComputationRefIdentifierName = 'computation-ref'
 
 export const computationName: ComputationIdentifierName = 'computation'
+export const computationRefName: ComputationRefIdentifierName = 'computation-ref'
 
 export type ComputationType = 'getter' | 'getter & setter'
 
@@ -52,7 +54,7 @@ export const isComputation = (value?: any): value is Computation<any[], any> | C
   return getIdentifier(value) === computationName
 }
 
-export const getComputationType = (value: Computation<any, any>): ComputationType | unknown => {
+export const getComputationType = (value: Computation<any, any>): ComputationType | string | undefined => {
   const valueInfo = info.get(value)
   return valueInfo?.type
 }
@@ -109,15 +111,17 @@ function _compute(unknown: any, mayRecipe?: any, name?: string): any {
     return computedValue
   }
 
-  info.set(self, {
-    relates: new Set(),
-    name: _name,
-    identifier: computationName,
-    type: typeof recipe === 'function' ? 'getter' : 'getter & setter',
-  })
+  if (process.env.NODE_ENV === 'development') {
+    info.set(self, {
+      relates: new Set(),
+      name: _name,
+      identifier: computationName,
+      type: typeof recipe === 'function' ? 'getter' : 'getter & setter',
+    })
 
-  if (state) {
-    relateState(state, self)
+    if (state) {
+      relateState(state, self)
+    }
   }
 
   return self
@@ -226,7 +230,23 @@ export function computeRef(unknown: any, mayTree?, name?: string): any {
 
   return Object.keys(result).reduce((resultRef, key) => {
     const item: () => any = result[key]
-    resultRef[key] = item()
+
+    const ref = item()
+
+    if (process.env.NODE_ENV === 'development') {
+      const name = getName(item)
+      const type = getComputationType(item)
+      /* istanbul ignore else [item must have the relates] */
+      const relates = getRelates(item) ?? new Set<AllKinds>()
+      info.set(ref, {
+        relates,
+        name: name,
+        identifier: computationRefName,
+        type,
+      })
+    }
+
+    resultRef[key] = ref
     return resultRef
   }, {} as Record<string, any>)
 }
