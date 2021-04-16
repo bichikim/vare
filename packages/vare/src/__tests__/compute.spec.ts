@@ -23,9 +23,9 @@ const setup = () => {
     },
   })
 
-  const tree = compute({
-    nameDeco: () => (foo.name + '-'),
-    nameStaticDeco: (deco: string) => (foo.name + deco),
+  const tree = compute(foo, {
+    nameDeco: (foo) => (foo.name + '-'),
+    nameStaticDeco: (foo, deco: string) => (foo.name + deco),
   })
 
   const relateTree = compute(foo, {

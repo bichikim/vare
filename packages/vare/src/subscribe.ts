@@ -42,7 +42,7 @@ export function subscribe<Args extends any[], Return = any>(action: Action<Args,
 export function subscribe<Args extends any[], Return = any>(computation: Computation<Args, Return>, hook: SubscribeHookArgs<Args>): WatchStopHandle
 export function subscribe<Args extends any[], Return = any>(computation: ComputationWritable<Args, Return>, hook: SubscribeHookArgs<Args>): WatchStopHandle
 export function subscribe<T>(computed: ComputedRef<T>, hook: SubscribeHookValue<T>): WatchStopHandle
-export function subscribe<T>(state: UnwrapNestedRefs<T>, hook: SubscribeHookArgs<[T]>): WatchStopHandle
+export function subscribe<T>(state: UnwrapNestedRefs<T>, hook: SubscribeHookValue<T>): WatchStopHandle
 export function subscribe(
   target,
   hook,

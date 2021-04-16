@@ -7,7 +7,7 @@ import {createUuid, getIdentifier} from './utils'
 const computationUuid = createUuid('unknown')
 
 export type ComputationRecipe<Args extends any[] = any, Return = any> = (...args: Args) => Return
-
+export type ComputationStateRecipe<S, Args extends any[] = any, Return = any> = (state: S, ...args: Args) => Return
 export type ComputationGetter<Args extends any[], Return> = (...args: Args) => Return
 export type ComputationSetter<Args extends any[], Value> = (value: Value, ...args: Args) => any
 export type ComputationSetterWithState<S, Args extends any[], Value> = (state: S, value: Value, ...args: Args) => any
@@ -150,7 +150,7 @@ export function compute<S extends AnyStateGroup, Args extends any[], T> (
 export function compute<Key extends string, Func extends ComputationRecipe> (
   tree: Record<Key, Func>,
 ): Record<Key, (...args: ComputeParameters<Func>) => ComputedRef<ReturnType<Func>>>
-export function compute<S extends AnyStateGroup, Key extends string, Func extends ComputationRecipe<[S, ...any[]]>> (
+export function compute<S extends AnyStateGroup, Key extends string, Func extends ComputationStateRecipe<S>> (
   state: S,
   tree: Record<Key, Func>,
 ): Record<Key, (...args: ComputeDropParameters<Func>) => ComputedRef<ReturnType<Func>>>

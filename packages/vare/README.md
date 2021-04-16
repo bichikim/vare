@@ -1,16 +1,12 @@
 # Vare
 
-Vue (Vue 3.x) Share State for a vue component
-
-This is a Prerelease version!
-
-This Vare works well, but there may be some unknown bugs.
+Vue Share State for Vue components
 
 ## What is this?
 
 Vare works like Vuex.
 
-However, this is less painful to create a Store than Vuex.
+However, Vare is less painful to create a Store than Vuex.
 
 ## Use Vare with Vue (Vue 3.0 or Vue 2 with @vue/composition-api) 
 
@@ -59,7 +55,6 @@ export const FooComponent = defineComponent(() => {
 import {state, mutate} from './src/index'
 import {defineComponent, h} from 'vue'
 
-
 const myState = state({
   name: 'foo',
 })
@@ -71,7 +66,7 @@ const setName = mutate((name: string) => {
 
 // using state in a components
 export const FooComponent = defineComponent(() => {
-  const name = computed(() => (state.name))
+  const name = computed(() => (myState.name))
   return () => {
     return h('div', [
       h('span', name.value),
@@ -106,7 +101,7 @@ export const requestName = act((name: string) => {
 })
 
 export const FooComponent = defineComponent(() => {
-  const name = computed(() => (state.name))
+  const name = computed(() => (myState.name))
 
   return () => {
     return h('div', [
@@ -235,23 +230,23 @@ Try to make a tree!
 import {state, compute, mutate, getName, act} from './src/index'
 
 const foo = state({
-  name: 'foo'
+  age: 999
 })
 
 export const computations = compute({
-  getName: () => (foo.name)
+  getAge: () => (foo.age)
 })
 
 export const mutations = mutate({
-  setName: (name: string) => {
-    foo.name = name
+  setAge: (age: number) => {
+    foo.age = age
   }
 })
 
 export const actions = act({
-  updateName: (name: string) => {
+  updateAge: (age: number) => {
     return Promise.resolve().then(() => {
-      mutations.setName(name)
+      mutations.setAge(age)
     })
   }
 })
@@ -263,11 +258,11 @@ const tree = {
   ...actions,
 }
 
-const name = tree.getName()
-tree.setName('bar')
-getName(tree.getName) // getName
-getName(tree.setName) // setName
-getName(tree.updateName) // updateName
+const age = tree.getAge() // 99
+tree.setAge(0)
+getName(tree.getAge) // 'getAge'
+getName(tree.setAge) // 'setAge'
+getName(tree.updateAge) // 'updateAge'
 
 ```
 
@@ -340,7 +335,7 @@ const myState = state({
 const getName = compute(() => myState.name)
 
 const setName = mutate((name: string) => {
-  state.foo = name
+  myState.foo = name
 })
 
 const App = defineComponent(() => {
@@ -391,6 +386,8 @@ myState.foo = 'bar'
 ### Vuex
 
 ```typescript
+import {createStore} from 'vuex'
+
 const store = createStore({
   state () {
     return {
@@ -398,9 +395,19 @@ const store = createStore({
     }
   },
   mutations: {
-    increment (state) {
+    increment: (state) => {
       state.count++
     }
+  },
+  actions: {
+    request: () => {
+      store.commit('increment')
+    },
+  },
+  getters: {
+    getCount: (state) => {
+      return state.count
+    },
   }
 })
 
@@ -421,23 +428,43 @@ const FooComponent = defineComponent(() => {
 
 In the Vare way
 ```typescript
+import {mutate, state, act, compute} from './src/index'
 // no need to setup
 
 const myState = state({
   count: 0,
 })
 
-const increment = mutate(() => {
-  myState.count++
+const mutations = mutate(myState, {
+  increment: (state) => {
+    state.count++
+  }
 })
 
+const actions = act({
+  request: () => {
+    mutations.increment()
+  }
+})
+
+const computations = compute(myState, {
+  getCount: (state) => (state.count) 
+})
+
+const store = {
+  state: myState,
+  ...mutations,
+  ...actions,
+  ...computations,
+}
+
 const FooComponent = defineComponent(() => {
-  const count = computed(() => (myState.count))
+  const count = computed(() => (store.state.count))
 
   return () => (
     h('div', [
       h('div', count.value),
-      h('a', {onClick: increment}),
+      h('a', {onClick: store.increment}),
     ])
   )
 })
