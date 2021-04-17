@@ -4,7 +4,7 @@ import {state} from '@/state'
 import {subscribe} from '@/subscribe'
 import {nextTick} from 'vue'
 import {compute} from '@/compute'
-process.env.NODE_ENV = 'development'
+// process.env.NODE_ENV = 'development'
 
 const setup = () => {
   const foo = state({
@@ -59,6 +59,7 @@ describe('subscribe', function test() {
   })
 
   it('should subscribe action', async function test() {
+    process.env.NODE_ENV = 'development'
     const {action} = setup()
 
     const actHook = jest.fn()
@@ -77,6 +78,7 @@ describe('subscribe', function test() {
   })
 
   it('should subscribe mutation', async function test() {
+    process.env.NODE_ENV = 'development'
     const {mutation} = setup()
 
     const mutateHook = jest.fn()
@@ -136,6 +138,7 @@ describe('subscribe', function test() {
     })
 
     it('should unsubscribe action', async function test() {
+      process.env.NODE_ENV = 'development'
       const {action} = setup()
 
       const actHook = jest.fn()
@@ -158,6 +161,7 @@ describe('subscribe', function test() {
     })
 
     it('should unsubscribe mutation', async function test() {
+      process.env.NODE_ENV = 'development'
       const {mutation} = setup()
 
       const mutateHook = jest.fn()
