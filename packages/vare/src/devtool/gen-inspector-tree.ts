@@ -1,6 +1,6 @@
 import {getComputationType} from '@/compute'
 import {State} from '@/state'
-import {AllKinds, getIdentifier, getName, getRelates} from '@/utils'
+import {AllKinds, getIdentifier, getName, getRelates} from '@/info'
 
 const textBackgroundColors = {
   unknown: 0xFF0000,

@@ -1,6 +1,7 @@
 import {State} from '@/state'
 import {subscribe} from '@/subscribe'
-import {AllKinds, drop, getIdentifier, getName, isSSR, setName, setPlayground} from '@/utils'
+import {drop, isSSR} from '@/utils'
+import {AllKinds, getIdentifier, getName, setName, setPlayground} from '@/info'
 import {DevtoolsPluginApi, setupDevtoolsPlugin, StateBase, TimelineEvent} from '@vue/devtools-api'
 import {App} from 'vue'
 import {genInspectorTree} from './gen-inspector-tree'

@@ -1,7 +1,7 @@
 import {act, isAction} from '@/act'
 import {mutate} from '@/mutate'
 import {state} from '@/state'
-import {getName} from '@/utils'
+import {getName} from '@/info'
 
 const setup = () => {
   const foo = state({

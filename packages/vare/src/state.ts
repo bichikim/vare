@@ -1,7 +1,8 @@
 import {AnyObject, UnwrapNestedRefs} from '@/types'
 import {reactive} from 'vue-demi'
-import {VareMember, AllKinds, createUuid} from './utils'
+import {createUuid} from './utils'
 import {info} from '@/info'
+import {AllKinds} from './info'
 
 export const stateUuid = createUuid('unknown')
 
@@ -12,8 +13,6 @@ export type State<State> = UnwrapNestedRefs<State>
 export type AnyStateGroup = State<any> | State<any>[] | Record<string, State<any>>
 
 export const stateType: StateIdentifierName = 'state'
-
-export type StateMembers = VareMember
 
 export const isState = (value: any): value is State<any> => {
   const valueInfo = info.get(value)

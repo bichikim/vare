@@ -1,9 +1,9 @@
-import {info} from '@/info'
+import {info, getIdentifier} from '@/info'
 import {AnyFunction, Tree} from '@/types'
-import {createUuid, getIdentifier} from '@/utils'
+import {createUuid} from '@/utils'
 import {ref} from 'vue-demi'
 import {devtools} from './devtool'
-import {subscribe, SubscribeMember} from './subscribe'
+import {subscribe} from './subscribe'
 
 const actionUuid = createUuid('unknown')
 
@@ -13,11 +13,8 @@ export type ActionIdentifierName = 'action'
 
 export const actionName: ActionIdentifierName = 'action'
 
-export type ActionMember<Args extends any[] = any[]> = SubscribeMember<Args>
-
 export type Action<Args extends any[], Return = any> =
   ((...args: Args) => Return | Promise<Return>)
-  & ActionMember<Args>
 
 /**
  * check if it is an action

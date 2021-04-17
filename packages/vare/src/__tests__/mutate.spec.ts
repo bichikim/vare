@@ -1,6 +1,6 @@
 import {mutate, isMutation} from '@/mutate'
 import {state} from '@/state'
-import {getName, getRelates} from '@/utils'
+import {getName, getRelates} from '@/info'
 
 const setup = () => {
   const foo = state({

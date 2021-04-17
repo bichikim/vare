@@ -1,9 +1,9 @@
-import {info} from '@/info'
+import {info, getIdentifier, getName, getRelates, AllKinds} from '@/info'
 import {AnyStateGroup, relateState} from '@/state'
 import {AnyFunction, DropParameters} from '@/types'
 import {ComputedRef, WritableComputedRef} from '@vue/reactivity'
 import {computed} from 'vue-demi'
-import {AllKinds, createUuid, getIdentifier, getName, getRelates} from './utils'
+import {createUuid} from './utils'
 
 const computationUuid = createUuid('unknown')
 

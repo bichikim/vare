@@ -1,10 +1,10 @@
 import {Tree, TreeDrop} from '@/types'
 import {ref} from 'vue-demi'
 import {devtools} from './devtool'
-import {info} from './info'
+import {info, getIdentifier} from './info'
 import {AnyStateGroup, relateState} from './state'
-import {subscribe, SubscribeMember} from './subscribe'
-import {createUuid, getIdentifier} from './utils'
+import {subscribe} from './subscribe'
+import {createUuid} from './utils'
 
 const mutationUuid = createUuid('unknown')
 
@@ -14,14 +14,12 @@ export type RelatedMutationRecipe<State, Args extends any[], Return> = (state: S
 
 export type MutationIdentifierName = 'mutation'
 
-export type MutationMember<Args extends any[]> = SubscribeMember<Args>
-
 export const mutationName: MutationIdentifierName = 'mutation'
 
 /**
  * the mutation return type
  */
-export type Mutation<Args extends any[], Return = any> = ((...args: Args) => Return) & MutationMember<Args>
+export type Mutation<Args extends any[], Return = any> = ((...args: Args) => Return)
 
 export const isMutation = (value?: any): value is Mutation<any[]> => {
   return getIdentifier(value) === mutationName

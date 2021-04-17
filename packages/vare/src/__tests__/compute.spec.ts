@@ -1,6 +1,6 @@
 import {compute, isComputation} from '@/compute'
 import {state} from '@/state'
-import {getName, getRelates} from '@/utils'
+import {getName, getRelates} from '@/info'
 import {shallowMount} from '@vue/test-utils'
 import {defineComponent, h, Ref, toRef} from 'vue'
 
