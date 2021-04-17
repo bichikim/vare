@@ -16,3 +16,15 @@ export const isSSR = (): boolean => {
   /* istanbul ignore next [no way to test] */
   return typeof window === 'undefined'
 }
+
+export const isPromise = (value: any): value is Promise<any> => {
+  return typeof value?.then === 'function' && typeof value?.catch === 'function'
+}
+
+export const devFreeze = <T>(target: T): Readonly<T> => {
+  if (process.env.NODE_ENV === 'development') {
+    return Object.freeze(target)
+  }
+
+  return target
+}
