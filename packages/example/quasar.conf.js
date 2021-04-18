@@ -86,6 +86,9 @@ module.exports = configure(function (/* ctx */) {
       https: false,
       port: 8080,
       open: true, // opens browser window automatically
+      watchOptions: {
+        poll: 1000,
+      },
     },
 
     // https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-framework

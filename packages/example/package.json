@@ -6,7 +6,7 @@
   "author": "Bichi Kim <bichi@live.co.kr>",
   "private": true,
   "scripts": {
-    "dev": "quasar dev -m pwa",
+    "dev": "quasar dev",
     "dev:bex": "quasar dev -m bex",
     "dev:android": "quasar dev -m capacitor -T android",
     "clean": "rimraf node_modules",
@@ -29,7 +29,7 @@
     "@types/node": "^10.17.15",
     "@typescript-eslint/eslint-plugin": "^4.9.0",
     "@typescript-eslint/parser": "^4.9.0",
-    "@vue/compiler-sfc": "^3.0.7",
+    "@vue/compiler-sfc": "^3.0.11",
     "@vue/eslint-config-standard": "^6.0.0",
     "@vue/eslint-config-typescript": "^7.0.0",
     "autoprefixer": "^9.8.6",
@@ -39,7 +39,8 @@
     "eslint-plugin-node": "^11.0.0",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-vue": "^7.0.0",
-    "workbox-webpack-plugin": "^5.0.0"
+    "workbox-webpack-plugin": "^5.0.0",
+    "webpack-dev-server": "^4.0.0-beta.2"
   },
   "browserslist": [
     "last 10 Chrome versions",

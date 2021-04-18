@@ -477,6 +477,6 @@ const FooComponent = defineComponent(() => {
 
 Yes!
 
-![devtool](media/devtool.PNG)
-![devtool](media/devtool1.PNG)
-![devtool](media/devtool2.PNG)
+![devtool](./media/devtool.PNG)
+![devtool](./media/devtool1.PNG)
+![devtool](./media/devtool2.PNG)
