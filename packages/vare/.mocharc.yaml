@@ -1,4 +1,0 @@
-require: "__tests__/mocha.js"
-extension: ["ts"]
-file: "__tests__/setup.js"
-spec: "__tests__/**/*.spec.ts"
