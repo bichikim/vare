@@ -1,5 +1,5 @@
 {
-  "name": "vare",
+  "name": "@winter-love/types",
   "version": "1.0.3",
   "private": false,
   "description": "share state for vue component ",
@@ -38,7 +38,6 @@
     "last 2 version"
   ],
   "dependencies": {
-    "@vue/devtools-api": "^6.0.0-beta.7",
     "vue-demi": "^0.7.4"
   },
   "devDependencies": {
@@ -54,8 +53,6 @@
     "@typescript-eslint/eslint-plugin": "^4.21.0",
     "@typescript-eslint/parser": "^4.21.0",
     "@vue/babel-preset-app": "^4.5.0",
-    "@vue/eslint-config-standard": "^6.0.0",
-    "@vue/eslint-config-typescript": "^7.0.0",
     "@vue/test-utils": "^2.0.0-beta.2",
     "@zerollup/ts-transform-paths": "^1.7.18",
     "babel-loader": "^8.1.0",
@@ -78,8 +75,6 @@
     "tslib": "^2.1.0",
     "ttypescript": "^1.5.10",
     "typescript": "^4.1.5",
-    "vue": "^3.0.11",
-    "webpack": "^5.0.0-beta.23",
-    "webpack-bundle-analyzer": "^4.4.0"
+    "vue": "^3.0.11"
   }
 }

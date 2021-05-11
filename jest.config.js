@@ -1,9 +1,14 @@
+const setupFilesAfterEnv = ['<rootDir>/jest.setup.ts']
+
 module.exports = {
   maxWorkers: '70%',
 
   moduleFileExtensions: ['js', 'jsx', 'ts', 'tsx'],
 
-  setupFilesAfterEnv: [
+  setupFilesAfterEnv,
+
+  snapshotSerializers: [
+    '@emotion/jest/serializer', /* if needed other snapshotSerializers should go here */
   ],
 
   moduleNameMapper: {
@@ -13,7 +18,11 @@ module.exports = {
   },
 
   projects: [
-    '<rootDir>/packages/*/jest.config.js',
+    {
+      displayName: 'test',
+      setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
+      testMatch: ['<rootDir>/packages/*/src/**/__tests__/*.spec.ts'],
+    },
   ],
 
   testPathIgnorePatterns: [

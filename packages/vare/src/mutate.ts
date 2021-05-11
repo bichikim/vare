@@ -1,4 +1,4 @@
-import {Tree, TreeDrop} from '@/types'
+import {FunctionObject, DropFunctionObject} from '@/types'
 import {ref} from 'vue-demi'
 import {devtools} from './devtool'
 import {info, getIdentifier} from './info'
@@ -126,11 +126,11 @@ export function mutate<Args extends any[], Return = any> (
 ): Mutation<Args>
 export function mutate<Func extends MutationRecipe, TreeOptions extends Record<string, Func>> (
   tree: TreeOptions,
-): Tree<TreeOptions>
+): FunctionObject<TreeOptions>
 export function mutate<S extends AnyStateGroup, Func extends MutationStateRecipe<S>, TreeOptions extends Record<string, Func>> (
   state: S,
   tree: TreeOptions,
-): TreeDrop<TreeOptions, S>
+): DropFunctionObject<TreeOptions, S>
 export function mutate(unknown, mayTree?, name?: string): any {
   if (typeof unknown === 'function' || typeof mayTree === 'function') {
     return _mutate(unknown, mayTree, name)

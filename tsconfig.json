@@ -125,17 +125,12 @@
     /* Do not emit output */
     // "noEmit": true,
     "paths": {
-      "@/*": ["src/*"],
-      "src/*": ["packages/vare/src/*"]
+      "@/*": ["src/*"]
     },
     "plugins": [{"transform": "@zerollup/ts-transform-paths"}]
   },
   "include": [
-    "test.ts",
-    "packages/vare/src/**/*.ts",
-    "packages/vare/src/**/*.tsx",
-    "packages/vare/tests/**/*.ts",
-    "packages/vare/tests/**/*.tsx",
+    "jest.setup.ts",
   ],
   "exclude": [
     "node_modules"
