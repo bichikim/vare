@@ -1,10 +1,10 @@
 # Vare
 
-Vue Share State for Vue components
+Share a state for Vue components
 
 ## What is this?
 
-Vare works like Vuex.
+Vare works like the Vuex.
 
 However, Vare is less painful to create a Store than Vuex.
 
