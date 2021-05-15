@@ -1,4 +1,4 @@
-import {AllKinds, getDescription, getName, getIdentifier, getRelates, getPlayground} from '@/utils'
+import {AllKinds, getDescription, getName, getIdentifier, getRelates, getPlayground} from '@/info'
 import {CustomInspectorState} from '@vue/devtools-api'
 
 export const genNoneStateInfo = (target: AllKinds): CustomInspectorState => {

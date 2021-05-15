@@ -4,7 +4,6 @@ node_modules
 coverage
 
 # dest
-/dist
 /.vuepress/dist
 
 # local env files

@@ -1,27 +1,25 @@
-import {DropParameters} from '@/types'
+import {FunctionObject, DropFunctionObject} from '@/types'
 import {ref} from 'vue-demi'
 import {devtools} from './devtool'
-import {info} from './info'
+import {info, getIdentifier} from './info'
 import {AnyStateGroup, relateState} from './state'
-import {subscribe, SubscribeMember} from './subscribe'
-import {createUuid, getIdentifier} from './utils'
+import {subscribe} from './subscribe'
+import {createUuid} from './utils'
 
 const mutationUuid = createUuid('unknown')
 
 export type MutationRecipe<Args extends any[] = any, Return = any> = (...args: Args) => Return
-export type MutationStateRecipe<S, Args extends any[] = any, Return = any> = (s: S, ...args: Args) => Return
+export type MutationStateRecipe<S = any, Args extends any[] = any, Return = any> = (s: S, ...args: Args) => Return
 export type RelatedMutationRecipe<State, Args extends any[], Return> = (state: State, ...args: Args) => Return
 
 export type MutationIdentifierName = 'mutation'
-
-export type MutationMember<Args extends any[]> = SubscribeMember<Args>
 
 export const mutationName: MutationIdentifierName = 'mutation'
 
 /**
  * the mutation return type
  */
-export type Mutation<Args extends any[], Return = any> = ((...args: Args) => Return) & MutationMember<Args>
+export type Mutation<Args extends any[], Return = any> = ((...args: Args) => Return)
 
 export const isMutation = (value?: any): value is Mutation<any[]> => {
   return getIdentifier(value) === mutationName
@@ -65,25 +63,25 @@ function _mutate(unknown, mayRecipe?: any, name?: string): Mutation<any> {
     return recipe(...newArgs)
   }
 
-  info.set(self, {
-    name: _name,
-    identifier: mutationName,
-    relates: new Set(),
-    watchFlag: flag,
-  })
-
-  // devtool
   if (process.env.NODE_ENV === 'development') {
+    info.set(self, {
+      name: _name,
+      identifier: mutationName,
+      relates: new Set(),
+      watchFlag: flag,
+    })
+
+    // devtool
     subscribe(self, () => {
       devtools?.updateTimeline('mutation', {
         title: _name,
       })
     })
-  }
 
-  // register mutation to state
-  if (state) {
-    relateState(state, self)
+    // register mutation to state
+    if (state) {
+      relateState(state, self)
+    }
   }
 
   return self
@@ -126,13 +124,13 @@ export function mutate<Args extends any[], Return = any> (
   recipe: MutationRecipe<Args, Return>,
   name?: string,
 ): Mutation<Args>
-export function mutate<Key extends string, Func extends MutationRecipe> (
-  tree: Record<Key, Func>,
-): Record<Key, (...args: Parameters<Func>) => ReturnType<Func>>
-export function mutate<S extends AnyStateGroup, Key extends string, Func extends MutationStateRecipe<S>> (
+export function mutate<Func extends MutationRecipe, TreeOptions extends Record<string, Func>> (
+  tree: TreeOptions,
+): FunctionObject<TreeOptions>
+export function mutate<S extends AnyStateGroup, Func extends MutationStateRecipe<S>, TreeOptions extends Record<string, Func>> (
   state: S,
-  tree: Record<Key, Func>,
-): Record<Key, (...args: DropParameters<Func, S>) => ReturnType<Func>>
+  tree: TreeOptions,
+): DropFunctionObject<TreeOptions, S>
 export function mutate(unknown, mayTree?, name?: string): any {
   if (typeof unknown === 'function' || typeof mayTree === 'function') {
     return _mutate(unknown, mayTree, name)

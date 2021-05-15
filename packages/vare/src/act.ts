@@ -1,9 +1,9 @@
-import {info} from '@/info'
-import {AnyFunction} from '@/types'
-import {createUuid, getIdentifier} from '@/utils'
+import {info, getIdentifier} from '@/info'
+import {AnyFunction, FunctionObject} from '@/types'
+import {createUuid} from '@/utils'
 import {ref} from 'vue-demi'
 import {devtools} from './devtool'
-import {subscribe, SubscribeMember} from './subscribe'
+import {subscribe} from './subscribe'
 
 const actionUuid = createUuid('unknown')
 
@@ -13,12 +13,14 @@ export type ActionIdentifierName = 'action'
 
 export const actionName: ActionIdentifierName = 'action'
 
-export type ActionMember<Args extends any[] = any[]> = SubscribeMember<Args>
-
 export type Action<Args extends any[], Return = any> =
   ((...args: Args) => Return | Promise<Return>)
-  & ActionMember<Args>
 
+/**
+ * check if it is an action
+ * only work in development NODE_ENV
+ * @param value
+ */
 export const isAction = (value?: any): value is Action<any> => {
   return getIdentifier(value) === actionName
 }
@@ -35,14 +37,14 @@ const _act = <Args extends any[], Return> (
     return recipe(...args)
   }
 
-  info.set(self, {
-    name: _name,
-    identifier: actionName,
-    relates: new Set(),
-    watchFlag: flag,
-  })
-
   if (process.env.NODE_ENV === 'development') {
+    info.set(self, {
+      name: _name,
+      identifier: actionName,
+      relates: new Set(),
+      watchFlag: flag,
+    })
+
     subscribe(self, () => {
       devtools?.updateTimeline('action', {
         title: _name,
@@ -62,7 +64,7 @@ const _treeAct = <K extends string, F extends AnyFunction> (
   }, {} as Record<any, any>)
 }
 
-export function act<K extends string, F extends ActionRecipe> (tree: Record<K, F>): Record<K, (...args: Parameters<F>) => ReturnType<F>>
+export function act<Func extends ActionRecipe, TreeOptions extends Record<string, Func>> (tree: TreeOptions): FunctionObject<TreeOptions>
 export function act<Args extends any[], Return> (
   recipe: ActionRecipe<Args, Return>,
   name?: string,
@@ -76,3 +78,5 @@ export function act(
   }
   return _treeAct(mayTree)
 }
+
+// todo create actRef

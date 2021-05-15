@@ -1,16 +1,33 @@
-import {info} from '@/info'
+import {info, getIdentifier, getName, getRelates, AllKinds} from '@/info'
 import {AnyStateGroup, relateState} from '@/state'
+import {AnyFunction, DropParameters} from '@/types'
 import {ComputedRef, WritableComputedRef} from '@vue/reactivity'
 import {computed} from 'vue-demi'
-import {createUuid, getIdentifier} from './utils'
+import {createUuid} from './utils'
 
 const computationUuid = createUuid('unknown')
 
+export type ComputationRefRecipe<Return = any> = () => Return
+export type ComputationStateRefRecipe<S, Return = any> = (state: S) => Return
 export type ComputationRecipe<Args extends any[] = any, Return = any> = (...args: Args) => Return
-
+export type ComputationStateRecipe<S, Args extends any[] = any, Return = any> = (state: S, ...args: Args) => Return
 export type ComputationGetter<Args extends any[], Return> = (...args: Args) => Return
 export type ComputationSetter<Args extends any[], Value> = (value: Value, ...args: Args) => any
+export type ComputationRefGetter<Return> = () => Return
+export type ComputationRefSetter<Value> = (value: Value) => any
+export type ComputationStateRefGetter<S, Return> = (state: S) => Return
+export type ComputationStateRefSetter<S, Value> = (state: S, value: Value) => any
 export type ComputationSetterWithState<S, Args extends any[], Value> = (state: S, value: Value, ...args: Args) => any
+
+export interface ComputationStateRecipeRefOptions<S, Return = any> {
+  get: ComputationStateRefGetter<S, Return>
+  set: ComputationStateRefSetter<S, Return>
+}
+
+export interface ComputationRecipeRefOptions<Return = any> {
+  get: ComputationRefGetter<Return>
+  set: ComputationRefSetter<Return>
+}
 
 export interface ComputationRecipeOptions<Args extends any[] = any, Return = any> {
   get: ComputationGetter<Args, Return>
@@ -23,8 +40,10 @@ export interface ComputationRecipeOptionsWithState<S, Args extends any[], Return
 }
 
 export type ComputationIdentifierName = 'computation'
+export type ComputationRefIdentifierName = 'computation-ref'
 
 export const computationName: ComputationIdentifierName = 'computation'
+export const computationRefName: ComputationRefIdentifierName = 'computation-ref'
 
 export type ComputationType = 'getter' | 'getter & setter'
 
@@ -35,12 +54,12 @@ export const isComputation = (value?: any): value is Computation<any[], any> | C
   return getIdentifier(value) === computationName
 }
 
-export const getComputationType = (value: Computation<any, any>): ComputationType | unknown => {
+export const getComputationType = (value: Computation<any, any>): ComputationType | string | undefined => {
   const valueInfo = info.get(value)
   return valueInfo?.type
 }
 
-const isRecipeOption = (value?: any): value is ComputationRecipe<any, any> => {
+const isRecipeOption = (value?: any): value is ComputationRecipe => {
   return typeof value === 'object' && typeof value.get === 'function' && typeof value.set === 'function'
 }
 
@@ -72,34 +91,37 @@ const getComputePrams = (unknown: any, mayRecipe?: any, name?: string) => {
 function _compute(unknown: any, mayRecipe?: any, name?: string): any {
   const {state, name: _name, recipe} = getComputePrams(unknown, mayRecipe, name)
 
-  const self = (...args: any[]): any => {
+  const self = (...args: Readonly<any[]>): any => {
     let computedValue
 
-    const newArgs = state ? [state, ...args] : args
+    const getArgs = state ? [state, ...args] : [...args]
+    const setArgs = (value) => state ? [state, value, ...args] : [value, ...args]
 
     // ComputationRecipe type
     if (typeof recipe === 'function') {
-      computedValue = computed(() => recipe(...newArgs))
+      computedValue = computed(() => recipe(...getArgs))
     } else {
       // ComputationRecipeOptions type
       computedValue = computed({
-        get: () => recipe.get(...newArgs),
-        set: (value) => recipe.set(value, ...newArgs),
+        get: () => recipe.get(...getArgs),
+        set: (value) => recipe.set(...setArgs(value)),
       })
     }
 
     return computedValue
   }
 
-  info.set(self, {
-    relates: new Set(),
-    name: _name,
-    identifier: computationName,
-    type: typeof recipe === 'function' ? 'getter' : 'getter & setter',
-  })
+  if (process.env.NODE_ENV === 'development') {
+    info.set(self, {
+      relates: new Set(),
+      name: _name,
+      identifier: computationName,
+      type: typeof recipe === 'function' ? 'getter' : 'getter & setter',
+    })
 
-  if (state) {
-    relateState(state, self)
+    if (state) {
+      relateState(state, self)
+    }
   }
 
   return self
@@ -126,8 +148,21 @@ function _treeCompute(mayState: any, mayTree?) {
   }, {} as Record<any, any>)
 }
 
-export type ComputeParameters<T extends ComputationRecipe | ComputationRecipeOptions> = T extends (...args: infer P) => any ? P : (T extends {get: (...args: infer P) => any} ? P : never)
-export type ComputeDropParameters<T extends ComputationRecipe | ComputationRecipeOptions, S = any> = T extends (a: S, ...args: infer P) => any ? P : (T extends {get: (a: S, ...args: infer A) => any} ? A : never)
+export type ComputeTree<T extends Record<string, AnyFunction>> = {
+  [P in keyof T]: (...args: Parameters<T[P]>) => ComputedRef<ReturnType<T[P]>>
+}
+
+export type ComputeRefTree<T extends Record<string, AnyFunction>> = {
+  [P in keyof T]: ComputedRef<ReturnType<T[P]>>
+}
+
+export type ComputeRefWritableTree<T extends Record<string, AnyFunction>> = {
+  [P in keyof T]: ComputedRef<ReturnType<T[P]>>
+}
+
+export type ComputeTreeDrop<T extends Record<string, AnyFunction>, S = any> = {
+  [P in keyof T]: (...args: DropParameters<T[P], S>) => ComputedRef<ReturnType<T[P]>>
+}
 
 export function compute<Args extends any[], T> (
   recipe: ComputationRecipe<Args, T>,
@@ -147,16 +182,71 @@ export function compute<S extends AnyStateGroup, Args extends any[], T> (
   recipe: ComputationRecipeOptionsWithState<S, Args, T>,
   name?: string,
 ): ComputationWritable<Args, T>
-export function compute<Key extends string, Func extends ComputationRecipe> (
-  tree: Record<Key, Func>,
-): Record<Key, (...args: ComputeParameters<Func>) => ComputedRef<ReturnType<Func>>>
-export function compute<S extends AnyStateGroup, Key extends string, Func extends ComputationRecipe<[S, ...any[]]>> (
+export function compute<Func extends ComputationRecipe, TreeOptions extends Record<string, Func>> (
+  tree: TreeOptions,
+): ComputeTree<TreeOptions>
+export function compute<S extends AnyStateGroup, Func extends ComputationStateRecipe<S>, TreeOptions extends Record<string, Func>> (
   state: S,
-  tree: Record<Key, Func>,
-): Record<Key, (...args: ComputeDropParameters<Func>) => ComputedRef<ReturnType<Func>>>
+  tree: TreeOptions,
+): ComputeTreeDrop<TreeOptions, S>
 export function compute(unknown: any, mayTree?, name?: string): any {
   if (typeof unknown === 'function' || isRecipeOption(unknown) || typeof mayTree === 'function' || isRecipeOption(mayTree)) {
     return _compute(unknown, mayTree, name)
   }
   return _treeCompute(unknown, mayTree)
+}
+
+export function computeRef<T> (
+  recipe: ComputationRefRecipe<T>,
+  name?: string,
+): ComputedRef<T>
+export function computeRef<S extends AnyStateGroup, T> (
+  state: S,
+  recipe: ComputationStateRefRecipe<S, T>,
+  name?: string,
+): ComputedRef<T>
+export function computeRef<T> (
+  recipe: ComputationRecipeRefOptions<T>,
+  name?: string,
+): WritableComputedRef<T>
+export function computeRef<S, T> (
+  state: S,
+  recipe: ComputationStateRecipeRefOptions<S, T>,
+  name?: string,
+): WritableComputedRef<T>
+export function computeRef<Func extends ComputationRefRecipe, TreeOptions extends Record<string, Func>> (
+  tree: TreeOptions,
+): ComputeRefTree<TreeOptions>
+export function computeRef<S extends AnyStateGroup, Func extends ComputationStateRefRecipe<S>, TreeOptions extends Record<string, Func>> (
+  state: S,
+  tree: TreeOptions,
+): ComputeRefTree<TreeOptions>
+export function computeRef(unknown: any, mayTree?, name?: string): any {
+  const result = compute(unknown, mayTree, name)
+
+  if (typeof result === 'function') {
+    return result()
+  }
+
+  return Object.keys(result).reduce((resultRef, key) => {
+    const item: () => any = result[key]
+
+    const ref = item()
+
+    if (process.env.NODE_ENV === 'development') {
+      const name = getName(item)
+      const type = getComputationType(item)
+      /* istanbul ignore else [item must have the relates] */
+      const relates = getRelates(item) ?? new Set<AllKinds>()
+      info.set(ref, {
+        relates,
+        name: name,
+        identifier: computationRefName,
+        type,
+      })
+    }
+
+    resultRef[key] = ref
+    return resultRef
+  }, {} as Record<string, any>)
 }

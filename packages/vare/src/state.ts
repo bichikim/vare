@@ -1,7 +1,8 @@
 import {AnyObject, UnwrapNestedRefs} from '@/types'
 import {reactive} from 'vue-demi'
-import {VareMember, AllKinds, createUuid} from './utils'
+import {createUuid} from './utils'
 import {info} from '@/info'
+import {AllKinds} from './info'
 
 export const stateUuid = createUuid('unknown')
 
@@ -12,8 +13,6 @@ export type State<State> = UnwrapNestedRefs<State>
 export type AnyStateGroup = State<any> | State<any>[] | Record<string, State<any>>
 
 export const stateType: StateIdentifierName = 'state'
-
-export type StateMembers = VareMember
 
 export const isState = (value: any): value is State<any> => {
   const valueInfo = info.get(value)
@@ -35,12 +34,19 @@ export const relate = (state: State<any>, target: AllKinds) => {
   }
 }
 
-export const relateState = (state: State<any> | State<any>[] | Record<string, State<any>>, target: AllKinds) => {
+export const relateState = (state: AnyStateGroup, target: AllKinds) => {
   if (isState(state)) {
     relate(state, target)
     return
   }
+
+  /* istanbul ignore if [array type has a type error :(] */
   if (Array.isArray(state)) {
+    /* istanbul ignore if [no need to test for env development] */
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('An array relation type has a type error. Please use an object type. sorry~')
+    }
+
     (state as State<any>[]).forEach((item) => {
       if (isState(item)) {
         relate(item, target)
@@ -48,6 +54,7 @@ export const relateState = (state: State<any> | State<any>[] | Record<string, St
     })
     return
   }
+
   if (typeof state === 'object') {
     Object.keys(state).forEach((key) => {
       const item: State<any> = state[key]
@@ -64,11 +71,13 @@ export const relateState = (state: State<any> | State<any>[] | Record<string, St
 export const state = <S extends AnyObject>(initState: S, name?: string): State<S> => {
   const state = reactive<S>(initState)
 
-  info.set(state, {
-    identifier: stateType,
-    name,
-    relates: new Set(),
-  })
+  if (process.env.NODE_ENV === 'development') {
+    info.set(state, {
+      identifier: stateType,
+      name,
+      relates: new Set(),
+    })
+  }
 
   return state
 }

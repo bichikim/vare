@@ -1,6 +1,6 @@
 import {compute, isComputation} from '@/compute'
 import {state} from '@/state'
-import {getName, getRelates} from '@/utils'
+import {getName, getRelates} from '@/info'
 import {shallowMount} from '@vue/test-utils'
 import {defineComponent, h, Ref, toRef} from 'vue'
 
@@ -19,13 +19,14 @@ const setup = () => {
   const nameDecoReactiveSet = compute({
     get: (deco: Ref<string>) => foo.name + deco.value,
     set: (name: string, deco: Ref<string>) => {
+      console.log(deco)
       foo.name = name + deco.value
     },
   })
 
-  const tree = compute({
-    nameDeco: () => (foo.name + '-'),
-    nameStaticDeco: (deco: string) => (foo.name + deco),
+  const tree = compute(foo, {
+    nameDeco: (foo) => (foo.name + '-'),
+    nameStaticDeco: (foo, deco: string) => (foo.name + deco),
   })
 
   const relateTree = compute(foo, {
@@ -139,7 +140,8 @@ describe('compute', function test() {
     expect(wrapper.get('#setReactive').text()).toBe('change????')
   })
 
-  it('should tree has names', () => {
+  it('should have a name in the tree', () => {
+    process.env.NODE_ENV = 'development'
     const {relateTree, tree} = setup()
 
     expect(getName(tree.nameDeco)).toBe('nameDeco')
@@ -147,7 +149,8 @@ describe('compute', function test() {
     expect(getName(relateTree.nameReactiveDeco)).toBe('nameReactiveDeco')
   })
 
-  it('should tree has relation', () => {
+  it('should have a relation in the tree', () => {
+    process.env.NODE_ENV = 'development'
     const {relateTree, foo} = setup()
 
     expect(getRelates(relateTree.nameReactiveDeco)?.has(foo)).toBeTruthy()

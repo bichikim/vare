@@ -1,12 +1,16 @@
 import {mutate, isMutation} from '@/mutate'
 import {state} from '@/state'
-import {getName, getRelates} from '@/utils'
+import {getName, getRelates} from '@/info'
 
 const setup = () => {
   const foo = state({
     name: 'foo',
     age: 10,
     gender: 'man',
+  })
+
+  const bar = state({
+    money: 100,
   })
 
   const changeFooName = mutate((name: string) => {
@@ -35,56 +39,87 @@ const setup = () => {
     },
   })
 
+  const multiRelateMutTree = mutate({foo, bar}, {
+    changeAgeAndMoney: ({foo, bar}, age: number, money: number) => {
+      foo.age = age
+      bar.money = money
+    },
+  })
+
   return {
     foo,
+    bar,
     changeFooName,
     relateChangeName,
     relateMutTree,
     mutTree,
+    multiRelateMutTree,
   }
 }
 
 describe('mutate', function test() {
   it('should be mutation', function test() {
+    process.env.NODE_ENV = 'development'
     const {changeFooName} = setup()
     expect(isMutation(changeFooName)).toBeTruthy()
   })
 
   it('should mutate state', function test() {
     const {changeFooName, foo} = setup()
+    expect(foo.name).toBe('foo')
     changeFooName('FOO')
-
     expect(foo.name).toBe('FOO')
   })
 
-  it('should mutate state & has relate', () => {
+  it('should mutate state', () => {
     const {relateChangeName, foo} = setup()
+    expect(foo.name).toBe('foo')
     relateChangeName('FOO')
-
-    expect(getRelates(relateChangeName)?.has(foo)).toBeTruthy()
     expect(foo.name).toBe('FOO')
   })
 
-  it('should mutate state & have a name be tree 1', function test() {
-    const {mutTree, foo} = setup()
-    mutTree.changeAge(20)
+  it('should have relation', () => {
+    process.env.NODE_ENV = 'development'
+    const {relateChangeName, foo} = setup()
+    expect(getRelates(relateChangeName)?.has(foo)).toBeTruthy()
+  })
 
-    expect(getName(mutTree.changeAge)).toBe('changeAge')
+  it('should mutate state in the tree 1', function test() {
+    const {mutTree, foo} = setup()
+    expect(foo.age).toBe(10)
+    mutTree.changeAge(20)
     expect(foo.age).toBe(20)
   })
 
-  it('should mutate state & have a name by tree 2', function test() {
+  it('should have a name in the tree 1', function test() {
+    process.env.NODE_ENV = 'development'
+    const {mutTree} = setup()
+    expect(getName(mutTree.changeAge)).toBe('changeAge')
+  })
+
+  it('should mutate state in the tree', function test() {
     const {mutTree, foo} = setup()
+    expect(foo.gender).toBe('man')
     mutTree.changeGender('woman')
-    expect(getName(mutTree.changeGender)).toBe('changeGender')
     expect(foo.gender).toBe('woman')
   })
 
-  it('show mutate state & have a relate by tree 1', function test() {
-    const {relateMutTree, foo} = setup()
+  it('should have a name in the tree', () => {
+    process.env.NODE_ENV = 'development'
+    const {mutTree} = setup()
+    expect(getName(mutTree.changeGender)).toBe('changeGender')
+  })
 
+  it('should mutate state', function test() {
+    const {relateMutTree, foo} = setup()
+    expect(foo.age).toBe(10)
     relateMutTree.changeAge(20)
-    expect(getRelates(relateMutTree.changeAge)?.has(foo)).toBeTruthy()
     expect(foo.age).toBe(20)
+  })
+
+  it('should have a relation in the tree', function test() {
+    process.env.NODE_ENV = 'development'
+    const {relateMutTree, foo} = setup()
+    expect(getRelates(relateMutTree.changeAge)?.has(foo)).toBeTruthy()
   })
 })
