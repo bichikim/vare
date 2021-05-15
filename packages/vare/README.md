@@ -6,7 +6,7 @@ Share a state for Vue components
 
 Vare works like the Vuex.
 
-However, Vare is less painful to create a Store than Vuex.
+However, Vare is less painful to create and use a state than the Vuex.
 
 ## Use Vare with Vue (Vue 3.0 or Vue 2 with @vue/composition-api) 
 
@@ -469,9 +469,6 @@ const FooComponent = defineComponent(() => {
   )
 })
 ```
-
-## Create the pack in easy way (WIP)
-
 
 ## Supporting Vue DevTool ?
 
